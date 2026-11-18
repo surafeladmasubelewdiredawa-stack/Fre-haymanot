@@ -120,11 +120,11 @@
         #cam-toast{position:absolute;top:42%;left:50%;transform:translateX(-50%);background:rgba(31,41,55,0.95);color:#fff;padding:15px 30px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.5);font-size:1.1rem;font-weight:600;opacity:0;visibility:hidden;transition:.3s;text-align:center;pointer-events:none;z-index:20;border:1px solid rgba(255,255,255,0.1);max-width:90vw}
         #cam-toast.show{opacity:1;visibility:visible}
         /* ===== ID template cards — FIXED design sizes, never reflow.
-           DOWNLOAD canvas : 768x480, drawn with the exact ID_LAYOUT spec (scale 2).
-           PAGE display    : ID_PAGE_LAYOUT (ID_LAYOUT scaled by ID_PAGE_K) —
+           DOWNLOAD canvas : 768x480, drawn with the independent ID_LAYOUT download spec (scale 2).
+           PAGE display    : ID_PAGE_LAYOUT (ID_LAYOUT_preview scaled by ID_PAGE_K) —
                              a separate code; K=1 → full-size 368x230 on the page,
                              then scaled down only as much as the screen needs.
-           PREVIEW overlay : full-size ID_LAYOUT view (368x230) before download.
+           PREVIEW overlay : full-size ID_LAYOUT_preview view (368x230) before download.
            Every element (QR, photo, texts) is anchored to the same relative spot
            in all three; each stack is scaled UNIFORMLY (transform: scale) to fit
            any screen size / zoom level. ===== */
@@ -399,7 +399,7 @@
             front: { size: 28, dx: 0, dy: 0 },   // above Full Name
             qr:    { size: 40, dx: 0, dy: 0 }    // inside QR center
         };
-        // Logo position/size is controlled independently inside ID_LAYOUT and ID_PREVIEW_LAYOUT.
+        // Logo position/size is controlled independently inside ID_LAYOUT (download) and ID_LAYOUT_preview (page/preview).
         function getLogoPos(mode, layout) {
             const fallback = ID_LOGO_DEFAULTS[mode] || ID_LOGO_DEFAULTS.front;
             const configured = layout && (mode === 'front' ? layout.logoAboveName : layout.qrLogo);
@@ -417,7 +417,7 @@
         });
 
         const ID_LAYOUT = {
-            churchName: { fontSize: "13px", fontWeight: "800", color: "#33011e", marginTop: "10px", marginBottom: "4px", marginLeft: "0px", marginRight: "0px" },
+            churchName: { fontSize: "13px", fontWeight: "800", color: "green", marginTop: "10px", marginBottom: "4px", marginLeft: "0px", marginRight: "0px" },
             classNameText: { fontSize: "14px", fontWeight: "700", color: "#4f46e5", marginTop: "10px", marginBottom: "10px", marginLeft: "0px", marginRight: "20px" },
             detailsText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelWidth: "80px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
             profilePic: { width: "96px", height: "96px", borderRadius: "50%", border: "3px #EdB200", ringGap: "4px", marginTop: "50px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
@@ -429,12 +429,24 @@
 
         // Independent layout controls for downloaded PNG files.
         // Edit this object without changing the on-screen ID / preview.
-        const ID_DOWNLOAD_LAYOUT = JSON.parse(JSON.stringify(ID_LAYOUT));
 
+
+        // BEFORE-DOWNLOAD PREVIEW + IN-PAGE DISPLAY layout.
+        // Edit this object to change the page/preview only. It does NOT affect PNG downloads.
+        const ID_LAYOUT_preview = {
+            churchName: { fontSize: "13px", fontWeight: "800", color: "red", marginTop: "10px", marginBottom: "4px", marginLeft: "0px", marginRight: "0px" },
+            classNameText: { fontSize: "14px", fontWeight: "700", color: "#4f46e5", marginTop: "10px", marginBottom: "10px", marginLeft: "0px", marginRight: "20px" },
+            detailsText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelWidth: "80px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
+            profilePic: { width: "96px", height: "96px", borderRadius: "50%", border: "3px #EdB200", ringGap: "4px", marginTop: "50px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
+            logoAboveName: { size: 28, dx: 0, dy: 0 },
+            qrLogo: { size: 40, dx: 0, dy: 0 },
+            qrCode: { width: 180, height: 180, bgColor: "transparent", borderRadius: "0px", padding: "0px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px", dotsColor: "#000000", dotsType: "rounded", cornersSquareColor: "#000000", cornersSquareType: "extra-rounded", cornersDotColor: "#000000", cornersDotType: "dot" },
+            emergencyText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelFontSize: "10px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" }
+        };
 
         // ============================================================
         //   STUDENT DETAIL PAGE DISPLAY: very-mini front/back cards side-by-side.
-        //   Downloaded PNGs continue using the original full-size ID_LAYOUT.
+        //   Downloaded PNGs use the separate ID_LAYOUT download settings.
         // ============================================================
         const ID_PAGE_K = 0.42;
         function scaleIDLayout(src, k) {
@@ -451,14 +463,14 @@
             });
             return out;
         }
-        const ID_PAGE_LAYOUT = scaleIDLayout(ID_LAYOUT, ID_PAGE_K);
+        const ID_PAGE_LAYOUT = scaleIDLayout(ID_LAYOUT_preview, ID_PAGE_K);
         const ID_PAGE_W = Math.round(368 * ID_PAGE_K);             // 368
         const ID_PAGE_H = Math.round(230 * ID_PAGE_K);             // 230
         const ID_PAGE_GAP = 8;
         const ID_PAGE_STACK_W = ID_PAGE_W * 2 + ID_PAGE_GAP;
         const ID_PAGE_STACK_H = ID_PAGE_H;
 
-        // ---- Shared ID card HTML builders (page = MINI layout, preview = ID_LAYOUT) ----
+        // ---- Shared ID card HTML builders (page = ID_LAYOUT_preview MINI layout, preview = ID_LAYOUT_preview) ----
         function idQRData(student) { return `ID: ${student.id}\nName: ${student.firstName} ${student.lastName}\nClass: ${student.className}\nPhone: ${student.phone || 'N/A'}`; }
         function renderQrInto(containerEl, student, size, layout = ID_LAYOUT) {
             if (!containerEl) return;
@@ -630,7 +642,7 @@
             if (!student) return;
             currentStudentId = id;
             const card = document.getElementById('student-id-card');
-            // PAGE DISPLAY uses ID_LAYOUT (scaled for the screen). Download uses ID_DOWNLOAD_LAYOUT.
+            // PAGE DISPLAY uses ID_LAYOUT_preview (scaled for the screen). Download uses ID_LAYOUT.
             const K = ID_PAGE_K, L = ID_PAGE_LAYOUT;
 
             card.innerHTML = `
@@ -652,7 +664,7 @@
                 </button>
             `;
 
-            renderQrInto(document.getElementById('qr-code-container'), student, L.qrCode.width);
+            renderQrInto(document.getElementById('qr-code-container'), student, L.qrCode.width, L);
             showView('student-detail');
             requestAnimationFrame(fitPageIDStack);
             setTimeout(fitPageIDStack, 80);
@@ -842,7 +854,7 @@
         };
 
         // ============================================================
-        //   ID DOWNLOAD — canvas compositor (ID_DOWNLOAD_LAYOUT drawn on top)
+        //   ID DOWNLOAD — canvas compositor (ID_LAYOUT drawn on top)
         //   When the ID download is made, the existing layout content
         //   (churchName at top, class, photo, details / emergency + QR)
         //   is rendered ON TOP of the template image.
@@ -870,8 +882,8 @@
         // ever clipping or moving. Uses the SVG's own coordinate size.
         function ensureQrViewBox(svgEl) {
             if (!svgEl) return;
-            const w = parseFloat(svgEl.getAttribute('width')) || ID_DOWNLOAD_LAYOUT.qrCode.width;
-            const h = parseFloat(svgEl.getAttribute('height')) || ID_DOWNLOAD_LAYOUT.qrCode.height;
+            const w = parseFloat(svgEl.getAttribute('width')) || ID_LAYOUT.qrCode.width;
+            const h = parseFloat(svgEl.getAttribute('height')) || ID_LAYOUT.qrCode.height;
             if (!svgEl.getAttribute('viewBox')) svgEl.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
             svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
             svgEl.style.width = '100%'; svgEl.style.height = '100%'; svgEl.style.display = 'block';
@@ -903,7 +915,7 @@
         }
 
         async function composeIDFace(student, side, qrSvgEl) {
-            const L = ID_DOWNLOAD_LAYOUT, S = ID_S, W = ID_CARD_W, H = ID_CARD_H;
+            const L = ID_LAYOUT, S = ID_S, W = ID_CARD_W, H = ID_CARD_H;
             const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
             const ctx = cv.getContext('2d');
             roundRectPath(ctx, 0, 0, W, H, 32); ctx.save(); ctx.clip();
@@ -1062,13 +1074,13 @@
             }
         }
 
-        // ---- BEFORE-DOWNLOAD PREVIEW uses the main ID_LAYOUT settings ----
-        // Change ID_LAYOUT above to adjust the visible ID and before-download preview.
-        // Download PNG styling is independent in ID_DOWNLOAD_LAYOUT.
-        const ID_PREVIEW_LAYOUT = ID_LAYOUT;
+        // ---- BEFORE-DOWNLOAD PREVIEW uses the independent ID_LAYOUT_preview settings ----
+        // Change ID_LAYOUT_preview to adjust the visible ID and before-download preview.
+        // Download PNG styling is independent in ID_LAYOUT.
+        const ID_PREVIEW_LAYOUT = ID_LAYOUT_preview;
 
         // ---- Compact ID Preview before download (both sides shown mini-size) ----
-        // Before-download preview uses ID_LAYOUT; downloads use ID_DOWNLOAD_LAYOUT.
+        // Before-download preview uses ID_LAYOUT_preview; downloads use ID_LAYOUT.
         const IDP_K = 0.40;
         const IDP_W = Math.round(368 * IDP_K), IDP_H = Math.round(230 * IDP_K), IDP_GAP = 10;
         const IDP_STACK_H = IDP_H * 2 + IDP_GAP;
@@ -1101,7 +1113,7 @@
             if (!stage) { downloadIDCards(); return; }
             const student = students.find(s => s.id === currentStudentId);
             if (!student) return;
-            // BEFORE-DOWNLOAD PREVIEW = compact mini-size, using the ID_LAYOUT settings.
+            // BEFORE-DOWNLOAD PREVIEW = compact mini-size, using the ID_LAYOUT_preview settings.
             const K = IDP_K, L = scaleIDLayout(ID_PREVIEW_LAYOUT, K);
             stage.innerHTML = '';
             stage.insertAdjacentHTML('beforeend', idCardShell('front', idFrontHTML(student, L, K), IDP_W, IDP_H, K));
