@@ -132,7 +132,9 @@
         .id-tpl-card > img{width:100% !important;height:100% !important;object-fit:cover;display:block}
         /* Page display stack (FULL-size cards, same uniform-scale mechanism) */
         .id-display-holder{position:relative;width:100%;display:flex;justify-content:center;overflow:hidden;padding:3px}
-        .id-display-stack{display:flex;flex-direction:row;align-items:center;justify-content:center;transform-origin:top center;will-change:transform}
+        .id-display-viewport{position:relative;flex:none;overflow:hidden;touch-action:pan-y;transform-origin:top center;will-change:transform}
+        .id-display-stack{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;transform:translateX(0);transition:transform .24s ease;will-change:transform}
+        .id-page-indicator{font-size:11px;color:#9ca3af;text-align:center;margin-top:6px;letter-spacing:.08em;font-weight:700}
 
         /* ID Preview overlay (display before download) — same fixed-size cards */
         #id-preview-overlay{position:fixed;inset:0;z-index:210;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.8);overflow:hidden}
@@ -388,7 +390,7 @@
         // ============================================================
         //   3.png LOGO POSITION CONTROL — THE CONTROL IS HERE (code ውስጥ, ከላይ ፊትለፊት)
         //   3.png is placed in TWO spots: above Full Name (front card, mini size)
-        //   and in the CENTER of the QR code (back card, white pad box behind it).
+        //   and in the CENTER of the QR code (with a transparent quiet gap around it).
         //     dx : RIGHT = + number   |   LEFT = − number
         //     dy : DOWN  = + number   |   UP   = − number
         //     size : logo size in px
@@ -417,7 +419,7 @@
         });
 
         const ID_LAYOUT = {
-            churchName: { fontSize: "13px", fontWeight: "800", color: "green", marginTop: "10px", marginBottom: "4px", marginLeft: "0px", marginRight: "0px" },
+            churchName: { fontSize: "13px", fontWeight: "800", color: "#1e3a8a", marginTop: "10px", marginBottom: "4px", marginLeft: "0px", marginRight: "0px" },
             classNameText: { fontSize: "14px", fontWeight: "700", color: "#4f46e5", marginTop: "10px", marginBottom: "10px", marginLeft: "0px", marginRight: "20px" },
             detailsText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelWidth: "80px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
             profilePic: { width: "96px", height: "96px", borderRadius: "50%", border: "3px #EdB200", ringGap: "4px", marginTop: "50px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
@@ -434,7 +436,7 @@
         // BEFORE-DOWNLOAD PREVIEW + IN-PAGE DISPLAY layout.
         // Edit this object to change the page/preview only. It does NOT affect PNG downloads.
         const ID_LAYOUT_preview = {
-            churchName: { fontSize: "13px", fontWeight: "800", color: "red", marginTop: "10px", marginBottom: "4px", marginLeft: "0px", marginRight: "0px" },
+            churchName: { fontSize: "13px", fontWeight: "800", color: "#1e3a8a", marginTop: "10px", marginBottom: "4px", marginLeft: "0px", marginRight: "0px" },
             classNameText: { fontSize: "14px", fontWeight: "700", color: "#4f46e5", marginTop: "10px", marginBottom: "10px", marginLeft: "0px", marginRight: "20px" },
             detailsText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelWidth: "80px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
             profilePic: { width: "96px", height: "96px", borderRadius: "50%", border: "3px #EdB200", ringGap: "4px", marginTop: "50px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
@@ -445,10 +447,10 @@
         };
 
         // ============================================================
-        //   STUDENT DETAIL PAGE DISPLAY: very-mini front/back cards side-by-side.
+        //   STUDENT DETAIL PAGE DISPLAY: one larger card at a time; swipe horizontally for the other side.
         //   Downloaded PNGs use the separate ID_LAYOUT download settings.
         // ============================================================
-        const ID_PAGE_K = 0.42;
+        const ID_PAGE_K = 0.90;
         function scaleIDLayout(src, k) {
             const out = {};
             Object.keys(src).forEach(sec => {
@@ -466,26 +468,26 @@
         const ID_PAGE_LAYOUT = scaleIDLayout(ID_LAYOUT_preview, ID_PAGE_K);
         const ID_PAGE_W = Math.round(368 * ID_PAGE_K);             // 368
         const ID_PAGE_H = Math.round(230 * ID_PAGE_K);             // 230
-        const ID_PAGE_GAP = 8;
+        const ID_PAGE_GAP = 0;
         const ID_PAGE_STACK_W = ID_PAGE_W * 2 + ID_PAGE_GAP;
         const ID_PAGE_STACK_H = ID_PAGE_H;
 
-        // ---- Shared ID card HTML builders (page = ID_LAYOUT_preview MINI layout, preview = ID_LAYOUT_preview) ----
+        // ---- Shared ID card HTML builders (page = enlarged ID_LAYOUT_preview, preview = compact ID_LAYOUT_preview) ----
         function idQRData(student) { return `ID: ${student.id}\nName: ${student.firstName} ${student.lastName}\nClass: ${student.className}\nPhone: ${student.phone || 'N/A'}`; }
         function renderQrInto(containerEl, student, size, layout = ID_LAYOUT) {
             if (!containerEl) return;
             const q = layout.qrCode;
+            const LP = getLogoPos('qr', layout);
             const qr = new QRCodeStyling({
-                width: size, height: size, type: "svg", data: idQRData(student), image: "",
+                width: size, height: size, type: "svg", data: idQRData(student), image: "3.png",
                 dotsOptions: { color: q.dotsColor, type: q.dotsType },
                 cornersSquareOptions: { color: q.cornersSquareColor, type: q.cornersSquareType },
                 cornersDotOptions: { color: q.cornersDotColor, type: q.cornersDotType },
                 backgroundOptions: { color: q.bgColor },
-                imageOptions: { crossOrigin: "anonymous", margin: Math.max(2, Math.round(6 * (size / q.width))) }
+                imageOptions: { crossOrigin: "anonymous", hideBackgroundDots: true, imageSize: Math.min(0.32, Math.max(0.08, LP.size / q.width)), margin: 0 }
             });
             containerEl.innerHTML = "";
-            // Keep the QR pattern on its own lower layer. The center logo is a
-            // separate opaque white overlay, so QR modules do NOT show through it.
+            // QRCodeStyling clears a quiet transparent area around 3.png; the logo keeps its alpha channel.
             containerEl.style.position = 'absolute';
             containerEl.style.inset = '0';
             containerEl.style.zIndex = '1';
@@ -576,10 +578,7 @@
                     </div>
                     <div style="position:relative;width:${L.qrCode.width}px;height:${L.qrCode.height}px;flex-shrink:0;isolation:isolate;overflow:hidden;">
                         <div id="${qrId}" style="position:absolute;inset:0;z-index:1;background-color:${L.qrCode.bgColor};padding:${L.qrCode.padding};border:0;box-shadow:none;width:100%;height:100%;overflow:hidden;"></div>
-                        <!-- Opaque knockout: QR modules stop around the logo; they never appear behind it. -->
-                        <div style="position:absolute;left:calc(50% + ${(LP.dx / 180 * 100).toFixed(3)}%);top:calc(50% + ${(LP.dy / 180 * 100).toFixed(3)}%);transform:translate(-50%,-50%);z-index:10;width:${(((LP.size + 12) / 180) * 100).toFixed(3)}%;height:${(((LP.size + 12) / 180) * 100).toFixed(3)}%;background:#ffffff!important;opacity:1;border-radius:16%;padding:${(6 / 180 * 100).toFixed(3)}%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 1px rgba(0,0,0,0.08);pointer-events:none;">
-                            <img src="3.png" alt="" style="display:block;width:100%;height:100%;object-fit:contain;background:#ffffff;image-rendering:auto;" onerror="this.parentElement.style.display='none'">
-                        </div>
+
                     </div>
                 </div>`;
         }
@@ -641,6 +640,7 @@
             const student = students.find(s => s.id === id);
             if (!student) return;
             currentStudentId = id;
+            currentIDSide = 0;
             const card = document.getElementById('student-id-card');
             // PAGE DISPLAY uses ID_LAYOUT_preview (scaled for the screen). Download uses ID_LAYOUT.
             const K = ID_PAGE_K, L = ID_PAGE_LAYOUT;
@@ -652,22 +652,47 @@
 
                 <div class="w-full mt-4 bg-gray-900 p-2 rounded-2xl">
                   <div class="id-display-holder" id="id-display-holder">
-                    <div class="id-display-stack" id="id-display-stack" style="gap:${ID_PAGE_GAP}px;">
-                    ${idCardShell('front', idFrontHTML(student, L, K), ID_PAGE_W, ID_PAGE_H, K)}
-                    ${idCardShell('back', idBackHTML(student, L, K, 'qr-code-container'), ID_PAGE_W, ID_PAGE_H, K)}
+                    <div class="id-display-viewport" id="id-display-viewport" style="width:${ID_PAGE_W}px;height:${ID_PAGE_H}px;">
+                      <div class="id-display-stack" id="id-display-stack" style="width:${ID_PAGE_STACK_W}px;height:${ID_PAGE_H}px;gap:0;">
+                        ${idCardShell('front', idFrontHTML(student, L, K), ID_PAGE_W, ID_PAGE_H, K)}
+                        ${idCardShell('back', idBackHTML(student, L, K, 'qr-code-container'), ID_PAGE_W, ID_PAGE_H, K)}
+                      </div>
                     </div>
                   </div>
+                  <div class="id-page-indicator" id="id-page-indicator">ID 1 / 2 · SWIPE LEFT OR RIGHT</div>
                 </div>
 
-                <button id="download-id-btn" onclick="openIDPreview()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-4 rounded-xl mt-8 active:scale-[0.98] shadow-lg transition-all flex items-center justify-center gap-2">
+                <div class="w-full flex items-stretch gap-2 mt-8">
+                  <button id="download-id-btn" onclick="openIDPreview()" class="flex-1 min-w-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-4 rounded-xl active:scale-[0.98] shadow-lg transition-all flex items-center justify-center gap-2">
                     <i class="fa-solid fa-download"></i> Download ID Cards
-                </button>
+                  </button>
+                  <button id="delete-student-btn" onclick="deleteCurrentStudent()" aria-label="Delete student" title="Delete student" class="shrink-0 px-5 bg-red-700 hover:bg-red-600 text-white font-semibold rounded-xl active:scale-[0.98] shadow-lg transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-trash"></i><span>Delete</span>
+                  </button>
+                </div>
             `;
 
             renderQrInto(document.getElementById('qr-code-container'), student, L.qrCode.width, L);
             showView('student-detail');
             requestAnimationFrame(fitPageIDStack);
             setTimeout(fitPageIDStack, 80);
+        }
+
+        function deleteCurrentStudent() {
+            const student = students.find(s => s.id === currentStudentId);
+            if (!student) return;
+            showConfirm('Delete Student', `Are you sure you want to delete ${student.firstName} ${student.lastName}? This cannot be undone.`, () => {
+                const deletedId = student.id;
+                const classNum = getCleanClassNumber(student.className);
+                students = students.filter(s => s.id !== deletedId);
+                persistStudents();
+                const attendance = getAttendanceData();
+                delete attendance[deletedId];
+                saveAttendanceData(attendance);
+                currentStudentId = null;
+                openClassStudents(classNum);
+                showToastApp('Student deleted successfully');
+            });
         }
 
         function getAttendanceData() { return JSON.parse(localStorage.getItem('churchAttendance')) || {}; }
@@ -704,14 +729,15 @@
                 // Index of this student's first registered mark (they may have joined mid-month)
                 let firstIdx = -1;
                 for (let fi = 0; fi < 26; fi++) { if (String(marks[fi] ?? '') !== '') { firstIdx = fi; break; } }
+                const beforeRegistrationIdx = Math.max(firstIdx, Math.max(0, (parseInt(student.startMark, 10) || 1) - 1));
                 let total = 0;
                 for (let i = 0; i < 26; i++) {
                     const val = String(marks[i] ?? '');
                     if (val !== '') {
                         total += parseInt(val) || 0;
                         html += `<td data-value="${val}" title="Mark ${i + 1}: Score ${val}"><span style="color:${MARK_COLORS[val] || '#f3f4f6'};font-size:1.1rem;font-weight:bold">${val}</span></td>`;
-                    } else if (firstIdx > 0 && i < firstIdx) {
-                        // Days BEFORE the student's first registered mark (e.g. joined at mark 10)
+                    } else if (beforeRegistrationIdx > 0 && i < beforeRegistrationIdx) {
+                        // Marks before this student's registration/first attendance show zero
                         // show 0 — display only, not counted in total/percent, not clickable
                         html += `<td data-value="" title="Mark ${i + 1}: before registration"><span style="color:#6b7280;font-size:1.1rem;font-weight:bold">0</span></td>`;
                     } else {
@@ -728,7 +754,7 @@
 
         function goToStep(step) { if (step === 1) { document.getElementById('form-step-1').classList.remove('hidden'); document.getElementById('form-step-2').classList.add('hidden'); } else { const first = document.getElementById('inp-first').value.trim(); if (!first) { showModal('Validation Error', 'First name is required before proceeding.'); return; } document.getElementById('form-step-1').classList.add('hidden'); document.getElementById('form-step-2').classList.remove('hidden'); } }
         function handleImageSelect(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { base64Image = e.target.result; document.getElementById('img-preview').src = base64Image; document.getElementById('img-preview-box').classList.remove('hidden'); document.getElementById('img-preview-box').classList.add('flex'); }; reader.readAsDataURL(file); }
-        function finishRegistration() { const cClass = document.getElementById('inp-class').value.trim(); if (!cClass) { showModal('Validation Error', 'Please assign a class (e.g. Class 1 through Class 8).'); return; } const randomId = 'STU-' + Math.floor(1000 + Math.random() * 9000); const student = { id: randomId, churchName: document.getElementById('inp-church').value.trim(), christName: document.getElementById('inp-christ').value.trim(), firstName: document.getElementById('inp-first').value.trim(), lastName: document.getElementById('inp-last').value.trim(), age: document.getElementById('inp-age').value.trim(), sex: document.getElementById('inp-sex').value, phone: document.getElementById('inp-phone').value.trim(), emerName: document.getElementById('inp-emer-name').value.trim(), emerPhone: document.getElementById('inp-emer-phone').value.trim(), className: cClass, pic: base64Image }; students.push(student); persistStudents(); showModal('Registration Successful', `Student ${student.firstName} has been saved successfully with ID: ${student.id}`); base64Image = null; document.getElementById('img-preview-box').classList.add('hidden'); document.getElementById('img-preview-box').classList.remove('flex'); document.getElementById('img-preview').src = ''; ['inp-church', 'inp-christ', 'inp-first', 'inp-last', 'inp-age', 'inp-phone', 'inp-emer-name', 'inp-emer-phone', 'inp-class'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); const sexEl = document.getElementById('inp-sex'); if (sexEl) sexEl.value = 'Male'; goToStep(1); switchNavTab('class'); }
+        function finishRegistration() { const cClass = document.getElementById('inp-class').value.trim(); if (!cClass) { showModal('Validation Error', 'Please assign a class (e.g. Class 1 through Class 8).'); return; } const randomId = 'STU-' + Math.floor(1000 + Math.random() * 9000); const student = { id: randomId, churchName: document.getElementById('inp-church').value.trim(), christName: document.getElementById('inp-christ').value.trim(), firstName: document.getElementById('inp-first').value.trim(), lastName: document.getElementById('inp-last').value.trim(), age: document.getElementById('inp-age').value.trim(), sex: document.getElementById('inp-sex').value, phone: document.getElementById('inp-phone').value.trim(), emerName: document.getElementById('inp-emer-name').value.trim(), emerPhone: document.getElementById('inp-emer-phone').value.trim(), className: cClass, pic: base64Image, startMark: maxMarkOfClass(getCleanClassNumber(cClass)) + 1 }; students.push(student); persistStudents(); showModal('Registration Successful', `Student ${student.firstName} has been saved successfully with ID: ${student.id}`); base64Image = null; document.getElementById('img-preview-box').classList.add('hidden'); document.getElementById('img-preview-box').classList.remove('flex'); document.getElementById('img-preview').src = ''; ['inp-church', 'inp-christ', 'inp-first', 'inp-last', 'inp-age', 'inp-phone', 'inp-emer-name', 'inp-emer-phone', 'inp-class'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); const sexEl = document.getElementById('inp-sex'); if (sexEl) sexEl.value = 'Male'; goToStep(1); switchNavTab('class'); }
         function getCleanClassNumber(str) { if(!str) return ""; return str.toLowerCase().replace(/[^0-9]/g, ''); }
 
         let videoStream = null, camInterval = null;
@@ -1022,17 +1048,8 @@
                 const qrImg = await svgToImg(qrSvgEl);
                 const qy = (H - qrSize) / 2;
                 if (qrImg) { ctx.imageSmoothingEnabled = true; ctx.drawImage(qrImg, qrX, qy, qrSize, qrSize); }
-                // 3.png logo centered in the QR — white pad box keeps the QR scannable
-                if (ID_LOGO_IMG) {
-                    const LPQ = getLogoPos('qr', L), logoQS = LPQ.size * S, qpad = 5 * S;
-                    const qcx = qrX + qrSize / 2 + LPQ.dx * S, qcy = qy + qrSize / 2 + LPQ.dy * S;
-                    roundRectPath(ctx, qcx - logoQS / 2 - qpad, qcy - logoQS / 2 - qpad, logoQS + qpad * 2, logoQS + qpad * 2, 8 * S);
-                    ctx.fillStyle = '#ffffff'; ctx.fill();
-                    const lim = ID_LOGO_IMG, r = Math.min(logoQS / lim.naturalWidth, logoQS / lim.naturalHeight);
-                    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
-                    ctx.drawImage(lim, qcx - lim.naturalWidth * r / 2, qcy - lim.naturalHeight * r / 2, lim.naturalWidth * r, lim.naturalHeight * r);
-                }
-                else {
+                // The QR SVG already contains 3.png with transparent background and a cleared center gap.
+                if (!ID_LOGO_IMG) {
                     ctx.strokeStyle = '#9ca3af'; ctx.lineWidth = 2; ctx.setLineDash([8, 6]);
                     roundRectPath(ctx, qrX, qy, qrSize, qrSize, 12); ctx.stroke(); ctx.setLineDash([]);
                     ctx.fillStyle = '#6b7280'; ctx.font = `700 ${28}px Inter, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -1049,6 +1066,38 @@
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
 
+        async function buildQrSvgForLayout(student, layout) {
+            const q = layout.qrCode, LP = getLogoPos('qr', layout);
+            const logoImg = ID_LOGO_IMG || await loadLocalImg('3.png');
+            let logoSource = '3.png';
+            if (logoImg) {
+                try {
+                    const logoCanvas = document.createElement('canvas');
+                    logoCanvas.width = logoImg.naturalWidth || logoImg.width;
+                    logoCanvas.height = logoImg.naturalHeight || logoImg.height;
+                    logoCanvas.getContext('2d').drawImage(logoImg, 0, 0);
+                    logoSource = logoCanvas.toDataURL('image/png');
+                } catch (e) { /* keep local image path as fallback */ }
+            }
+            const holder = document.createElement('div');
+            holder.style.cssText = 'position:fixed;left:-10000px;top:-10000px;width:1px;height:1px;overflow:hidden;';
+            document.body.appendChild(holder);
+            try {
+                const qr = new QRCodeStyling({
+                    width: q.width, height: q.height, type: 'svg', data: idQRData(student), image: logoSource,
+                    dotsOptions: { color: q.dotsColor, type: q.dotsType },
+                    cornersSquareOptions: { color: q.cornersSquareColor, type: q.cornersSquareType },
+                    cornersDotOptions: { color: q.cornersDotColor, type: q.cornersDotType },
+                    backgroundOptions: { color: q.bgColor },
+                    imageOptions: { crossOrigin: 'anonymous', hideBackgroundDots: true, imageSize: Math.min(0.32, Math.max(0.08, LP.size / q.width)), margin: 0 }
+                });
+                qr.append(holder);
+                await new Promise(resolve => setTimeout(resolve, 250));
+                const svg = holder.querySelector('svg');
+                return svg ? svg.cloneNode(true) : null;
+            } finally { holder.remove(); }
+        }
+
         async function downloadIDCards() {
             const student = students.find(s => s.id === currentStudentId);
             if (!student) return;
@@ -1060,8 +1109,8 @@
                 triggerPngDownload(front, `Student_ID_Front_${student.id}.png`);
                 await new Promise(r => setTimeout(r, 700));
                 btn.innerText = 'Generating Back...';
-                // QR vector source: page mini QR first, preview QR as fallback (both SVG, scales losslessly)
-                const qrSvg = document.querySelector('#qr-code-container svg') || document.querySelector('#qr-code-container-preview svg');
+                // Download QR is generated from the independent download ID_LAYOUT.
+                const qrSvg = await buildQrSvgForLayout(student, ID_LAYOUT);
                 const back = await composeIDFace(student, 'back', qrSvg);
                 triggerPngDownload(back, `Student_ID_Back_${student.id}.png`);
                 showModal('Success', 'Front and Back ID cards have been downloaded with the ID layout applied!');
@@ -1097,16 +1146,48 @@
             wrap.style.transform = 'scale(' + k + ')';
             holder.style.height = (IDP_STACK_H * k) + 'px';
         }
-        // Student detail page: keep the two very-mini cards side-by-side and fit them to the screen.
+        // Student detail page: show one card at a time and fit it to the screen.
+        let currentIDSide = 0;
+        let idSwipeStartX = null;
+        function setIDPageSide(side) {
+            currentIDSide = side ? 1 : 0;
+            const stack = document.getElementById('id-display-stack');
+            const indicator = document.getElementById('id-page-indicator');
+            if (stack) stack.style.transform = `translateX(${-currentIDSide * ID_PAGE_W}px)`;
+            if (indicator) indicator.textContent = `ID ${currentIDSide + 1} / 2 · SWIPE LEFT OR RIGHT`;
+        }
+        function attachIDSwipe() {
+            const viewport = document.getElementById('id-display-viewport');
+            if (!viewport || viewport.dataset.swipeReady) return;
+            viewport.dataset.swipeReady = '1';
+            viewport.addEventListener('touchstart', e => { idSwipeStartX = e.touches && e.touches.length ? e.touches[0].clientX : null; }, { passive: true });
+            viewport.addEventListener('touchend', e => {
+                if (idSwipeStartX === null || !e.changedTouches || !e.changedTouches.length) return;
+                const dx = e.changedTouches[0].clientX - idSwipeStartX;
+                if (Math.abs(dx) > 35) setIDPageSide(dx < 0 ? 1 : 0);
+                idSwipeStartX = null;
+            }, { passive: true });
+            viewport.addEventListener('wheel', e => {
+                if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 15) {
+                    e.preventDefault(); setIDPageSide(e.deltaX > 0 ? 1 : 0);
+                }
+            }, { passive: false });
+        }
         function fitPageIDStack() {
             const view = document.getElementById('view-student-detail');
             const holder = document.getElementById('id-display-holder');
+            const viewport = document.getElementById('id-display-viewport');
             const stack = document.getElementById('id-display-stack');
-            if (!view || !holder || !stack || view.classList.contains('hidden')) return;
+            if (!view || !holder || !viewport || !stack || view.classList.contains('hidden')) return;
             const cw = holder.clientWidth || Math.max(view.clientWidth - 40, 120);
-            const k = Math.min(1, Math.max(0.1, (cw - 12) / ID_PAGE_STACK_W));
-            stack.style.transform = 'scale(' + k + ')';
-            holder.style.height = (8 + ID_PAGE_STACK_H * k) + 'px';
+            const k = Math.min(1, Math.max(0.1, (cw - 12) / ID_PAGE_W));
+            viewport.style.transform = 'scale(' + k + ')';
+            viewport.style.transformOrigin = 'top center';
+            viewport.style.width = ID_PAGE_W + 'px';
+            viewport.style.height = ID_PAGE_H + 'px';
+            holder.style.height = (8 + ID_PAGE_H * k) + 'px';
+            setIDPageSide(currentIDSide);
+            attachIDSwipe();
         }
         function openIDPreview() {
             const stage = document.getElementById('id-preview-stage');
@@ -1311,8 +1392,10 @@
             const mArr = (getAttendanceData()[studentId]) || [];
             let firstIdx = -1;
             for (let fi = 0; fi < 26; fi++) { if (String(mArr[fi] ?? '') !== '') { firstIdx = fi; break; } }
-            if (firstIdx > 0) {
-                for (let i = 0; i < firstIdx; i++) {
+            const stForStart = students.find(x => x.id === studentId);
+            const beforeRegistrationIdx = Math.max(firstIdx, Math.max(0, (parseInt(stForStart && stForStart.startMark, 10) || 1) - 1));
+            if (beforeRegistrationIdx > 0) {
+                for (let i = 0; i < beforeRegistrationIdx; i++) {
                     const c = row.cells[3 + i]; if (!c) continue;
                     if ((c.dataset.value || '') === '') {
                         c.innerHTML = `<span style="color:#6b7280;font-size:1.1rem;font-weight:bold">0</span>`;
