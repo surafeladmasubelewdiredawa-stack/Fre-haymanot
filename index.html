@@ -964,63 +964,79 @@
 
         function finishRegistration() {
             try {
-            if (!validateRegistrationFields()) {
-                const step2 = document.getElementById('form-step-2');
-                if (step2 && !step2.classList.contains('hidden')) return;
-                return;
-            }
-            if (!validateStudentName()) { document.getElementById('inp-first').focus(); return; }
-            const cClass = document.getElementById('inp-class').value.trim();
-            const values = {
-                churchName: document.getElementById('inp-church').value.trim(),
-                christName: document.getElementById('inp-christ').value.trim(),
-                firstName: document.getElementById('inp-first').value.trim(),
-                lastName: document.getElementById('inp-last').value.trim(),
-                age: document.getElementById('inp-age').value.trim(),
-                sex: document.getElementById('inp-sex').value,
-                phone: document.getElementById('inp-phone').value.trim(),
-                emerName: document.getElementById('inp-emer-name').value.trim(),
-                emerPhone: document.getElementById('inp-emer-phone').value.trim(),
-                className: cClass,
-                pic: base64Image
-            };
-            if (editingStudentId) {
-                const index = students.findIndex(st => st.id === editingStudentId);
-                if (index < 0) return;
-                students[index] = { ...students[index], ...values };
-                const savedId = editingStudentId;
-                editingStudentId = null;
+                if (!validateRegistrationFields()) return;
+                // Re-check duplicates at the moment of saving. Only the exact pair is blocked.
+                if (!validateStudentName()) {
+                    document.getElementById('inp-first').focus();
+                    return;
+                }
+                const cClass = document.getElementById('inp-class').value.trim();
+                const values = {
+                    churchName: document.getElementById('inp-church').value.trim(),
+                    christName: document.getElementById('inp-christ').value.trim(),
+                    firstName: document.getElementById('inp-first').value.trim(),
+                    lastName: document.getElementById('inp-last').value.trim(),
+                    age: document.getElementById('inp-age').value.trim(),
+                    sex: document.getElementById('inp-sex').value,
+                    phone: document.getElementById('inp-phone').value.trim(),
+                    emerName: document.getElementById('inp-emer-name').value.trim(),
+                    emerPhone: document.getElementById('inp-emer-phone').value.trim(),
+                    className: cClass,
+                    pic: base64Image
+                };
+
+                if (editingStudentId) {
+                    const savedId = editingStudentId;
+                    const index = students.findIndex(st => st.id === savedId);
+                    if (index < 0) {
+                        showToastApp('Student record was not found. Please reopen Edit ID.');
+                        return;
+                    }
+                    students[index] = { ...students[index], ...values };
+                    persistStudents();
+                    editingStudentId = null;
+                    document.querySelector('#view-new-root h2').innerText = 'Register';
+                    const cancelBtn = document.getElementById('edit-cancel-btn');
+                    if (cancelBtn) cancelBtn.classList.add('hidden');
+                    const finishBtn = document.querySelector('#form-step-2 button[onclick="finishRegistration()"]');
+                    if (finishBtn) finishBtn.innerText = 'Finish';
+                    base64Image = null;
+                    showToastApp('Student information updated');
+                    openStudentDetail(savedId);
+                    return;
+                }
+
+                const randomId = 'STU-' + Math.floor(1000 + Math.random() * 9000);
+                const student = { id: randomId, ...values, startMark: nextIncompleteMarkOfClass(getCleanClassNumber(cClass)) };
+                students.push(student);
                 persistStudents();
-                document.querySelector('#view-new-root h2').innerText = 'Register';
-                const cancelBtn = document.getElementById('edit-cancel-btn');
-                if (cancelBtn) cancelBtn.classList.add('hidden');
-                const finishBtn = document.querySelector('#form-step-2 button[onclick="finishRegistration()"]');
-                if (finishBtn) finishBtn.innerText = 'Finish';
-                showToastApp('Student information updated');
+
+                // Reset the registration form, then open the newly created student's ID page.
                 base64Image = null;
-                openStudentDetail(savedId);
-                return;
+                clearStudentNameErrors();
+                const previewBox = document.getElementById('img-preview-box');
+                if (previewBox) { previewBox.classList.add('hidden'); previewBox.classList.remove('flex'); }
+                const preview = document.getElementById('img-preview');
+                if (preview) preview.src = '';
+                ['inp-church', 'inp-christ', 'inp-first', 'inp-last', 'inp-age', 'inp-phone', 'inp-emer-name', 'inp-emer-phone', 'inp-class', 'inp-sex'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.value = id === 'inp-church' ? 'Fre Haymanot' : '';
+                        el.placeholder = '';
+                        el.classList.remove('validation-placeholder');
+                        el.style.borderColor = '';
+                    }
+                });
+                const classPicker = document.getElementById('class-picker');
+                if (classPicker) classPicker.classList.add('hidden');
+                const sexPicker = document.getElementById('sex-picker');
+                if (sexPicker) sexPicker.classList.add('hidden');
+                goToStep(1);
+                openStudentDetail(student.id);
+            } catch (error) {
+                console.error('Finish registration failed:', error);
+                showToastApp('Could not save student: ' + (error && error.message ? error.message : 'Please try again.'));
             }
-            const randomId = 'STU-' + Math.floor(1000 + Math.random() * 9000);
-            const student = { id: randomId, ...values, startMark: nextIncompleteMarkOfClass(getCleanClassNumber(cClass)) };
-            students.push(student);
-            persistStudents();
-            showModal('Registration Successful', `Student ${student.firstName} has been saved successfully with ID: ${student.id}`);
-            base64Image = null;
-            clearStudentNameErrors();
-            document.getElementById('img-preview-box').classList.add('hidden');
-            document.getElementById('img-preview-box').classList.remove('flex');
-            document.getElementById('img-preview').src = '';
-            ['inp-church', 'inp-christ', 'inp-first', 'inp-last', 'inp-age', 'inp-phone', 'inp-emer-name', 'inp-emer-phone', 'inp-class', 'inp-sex'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) { el.value = id === 'inp-church' ? 'Fre Haymanot' : ''; el.placeholder = ''; el.classList.remove('validation-placeholder'); el.style.borderColor = ''; }
-            });
-            const classPicker = document.getElementById('class-picker');
-            if (classPicker) classPicker.classList.add('hidden');
-            const sexPicker = document.getElementById('sex-picker');
-            if (sexPicker) sexPicker.classList.add('hidden');
-            goToStep(1); switchNavTab('class');
-            } catch (error) { console.error('Finish registration failed:', error); showToastApp('Could not save student. Please check the fields and try again.'); }
         }
         function getCleanClassNumber(str) { if(!str) return ""; return str.toLowerCase().replace(/[^0-9]/g, ''); }
 
@@ -1967,10 +1983,18 @@
             if (typeof idbSet === 'function') idbSet(key, null);
         }
         function persistStudents() {
-            localStorage.setItem('churchStudents', JSON.stringify(students));
-            if (typeof idbSet === 'function') idbSet('churchStudents', students);
-            if (!applyingRemote) markCloudPending('pending_students_sync');
-            pushStudentsToFirebase();
+            const snapshot = JSON.stringify(students);
+            try { localStorage.setItem('churchStudents', snapshot); }
+            catch (e) { console.warn('LocalStorage save failed:', e); }
+            try {
+                if (typeof idbSet === 'function') {
+                    Promise.resolve(idbSet('churchStudents', students)).catch(e => console.warn('IndexedDB save failed:', e));
+                }
+            } catch (e) { console.warn('IndexedDB save failed:', e); }
+            if (!applyingRemote) {
+                try { markCloudPending('pending_students_sync'); } catch (e) { console.warn('Sync queue save failed:', e); }
+            }
+            try { pushStudentsToFirebase(); } catch (e) { console.warn('Cloud sync start failed:', e); }
         }
         async function pushStudentsToFirebase() {
             if (!fbReady || !navigator.onLine || applyingRemote) return;
