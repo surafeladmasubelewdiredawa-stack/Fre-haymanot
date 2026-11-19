@@ -764,7 +764,35 @@
             });
         }
 
-        function goToStep(step) { if (step === 1) { document.getElementById('form-step-1').classList.remove('hidden'); document.getElementById('form-step-2').classList.add('hidden'); } else { const firstEl = document.getElementById('inp-first'); const first = firstEl.value.trim(); if (!first) { firstEl.placeholder = 'Please enter First Name'; firstEl.classList.add('validation-placeholder'); firstEl.style.borderColor = '#ef4444'; firstEl.focus(); return; } document.getElementById('form-step-1').classList.add('hidden'); document.getElementById('form-step-2').classList.remove('hidden'); } }
+        function goToStep(step) {
+            if (step === 1) {
+                document.getElementById('form-step-1').classList.remove('hidden');
+                document.getElementById('form-step-2').classList.add('hidden');
+                return;
+            }
+            const stepOneFields = [
+                ['inp-church', 'Church Name'], ['inp-christ', 'Christ Name'],
+                ['inp-first', 'First Name'], ['inp-last', 'Last Name']
+            ];
+            let firstMissing = null;
+            stepOneFields.forEach(([id, label]) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (!String(el.value || '').trim()) {
+                    el.placeholder = `Please enter ${label}`;
+                    el.classList.add('validation-placeholder');
+                    el.style.borderColor = '#ef4444';
+                    if (!firstMissing) firstMissing = el;
+                } else {
+                    el.placeholder = '';
+                    el.classList.remove('validation-placeholder');
+                    el.style.borderColor = '';
+                }
+            });
+            if (firstMissing) { firstMissing.focus(); return; }
+            document.getElementById('form-step-1').classList.add('hidden');
+            document.getElementById('form-step-2').classList.remove('hidden');
+        }
         function handleImageSelect(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { base64Image = e.target.result; document.getElementById('img-preview').src = base64Image; document.getElementById('img-preview-box').classList.remove('hidden'); document.getElementById('img-preview-box').classList.add('flex'); }; reader.readAsDataURL(file); }
         function toggleClassPicker(e) {
             if (e) e.stopPropagation();
@@ -790,19 +818,32 @@
                 ['inp-emer-name','Emergency Name'], ['inp-emer-phone','Emergency Phone'],
                 ['inp-class','Class']
             ];
-            fields.forEach(([id]) => { const el = document.getElementById(id); if (el) { el.placeholder = ''; el.classList.remove('validation-placeholder'); } });
-            for (const [id, label] of fields) {
+            let firstMissing = null;
+            fields.forEach(([id, label]) => {
                 const el = document.getElementById(id);
-                if (el && !String(el.value || '').trim()) {
+                if (!el) return;
+                if (!String(el.value || '').trim()) {
                     el.placeholder = id === 'inp-class' ? 'Please choose Class' : `Please enter ${label}`;
                     el.classList.add('validation-placeholder');
                     el.style.borderColor = '#ef4444';
-                    el.focus();
-                    return false;
-                } else if (el) el.style.borderColor = '';
+                    if (!firstMissing) firstMissing = el;
+                } else {
+                    el.placeholder = '';
+                    el.classList.remove('validation-placeholder');
+                    el.style.borderColor = '';
+                }
+            });
+            if (firstMissing) {
+                if (firstMissing.id === 'inp-class') {
+                    const picker = document.getElementById('class-picker');
+                    if (picker) picker.classList.remove('hidden');
+                }
+                firstMissing.focus();
+                return false;
             }
             return true;
         }
+
 
         document.addEventListener('input', (event) => { const el = event.target; if (el && el.matches('#inp-church, #inp-christ, #inp-first, #inp-last, #inp-age, #inp-phone, #inp-emer-name, #inp-emer-phone, #inp-class')) { el.placeholder = ''; el.classList.remove('validation-placeholder'); el.style.borderColor = ''; } });
 
