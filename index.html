@@ -591,7 +591,7 @@
                         ${grp('Emergency Name :', student.emerName || 'N/A')}
                         ${grp('Phone :', student.emerPhone || 'N/A')}
                     </div>
-                    <div style="position:relative;width:${L.qrCode.width}px;height:${L.qrCode.height}px;flex-shrink:0;isolation:isolate;overflow:visible;background:#fff;box-shadow:0 0 0 10px #fff;border-radius:2px;">
+                    <div style="position:relative;width:${L.qrCode.width}px;height:${L.qrCode.height}px;flex-shrink:0;isolation:isolate;overflow:hidden;">
                         <div id="${qrId}" style="position:absolute;inset:0;z-index:1;background-color:${L.qrCode.bgColor};padding:${L.qrCode.padding};border:0;box-shadow:none;width:100%;height:100%;overflow:hidden;"></div>
 
                     </div>
@@ -1020,6 +1020,33 @@
             if (camInterval) clearInterval(camInterval);
             updateScanBtnUI();
         }
+        // Decode across the complete source image (no QR-only crop). Try the original pixels,
+        // alternate inversion handling, and a contrast-enhanced full-frame pass for printed IDs.
+        function decodeQrFromCanvas(sourceCanvas) {
+            const w = sourceCanvas.width, h = sourceCanvas.height;
+            if (!w || !h) return null;
+            const work = document.createElement('canvas');
+            work.width = w; work.height = h;
+            const cx = work.getContext('2d', { willReadFrequently: true });
+            cx.drawImage(sourceCanvas, 0, 0, w, h);
+            const attempts = [];
+            const original = cx.getImageData(0, 0, w, h);
+            attempts.push(original);
+            const enhanced = cx.createImageData(w, h);
+            for (let i = 0; i < original.data.length; i += 4) {
+                const gray = Math.round(original.data[i] * .299 + original.data[i+1] * .587 + original.data[i+2] * .114);
+                const v = gray < 150 ? 0 : 255;
+                enhanced.data[i] = enhanced.data[i+1] = enhanced.data[i+2] = v;
+                enhanced.data[i+3] = original.data[i+3];
+            }
+            attempts.push(enhanced);
+            for (const data of attempts) {
+                const result = jsQR(data.data, w, h, { inversionAttempts: 'attemptBoth' });
+                if (result && result.data) return result;
+            }
+            return null;
+        }
+
         function scanCam() {
             if (camInterval) clearInterval(camInterval);
             const ctx = cameraCanvas.getContext('2d');
@@ -1029,10 +1056,11 @@
                 if (cameraFeed.readyState === cameraFeed.HAVE_ENOUGH_DATA) {
                     cameraCanvas.height = cameraFeed.videoHeight; cameraCanvas.width = cameraFeed.videoWidth;
                     ctx.drawImage(cameraFeed, 0, 0, cameraCanvas.width, cameraCanvas.height);
-                    const decoded = decodeQrFromCanvas(cameraCanvas);
-                    if (decoded) {
+                    const img = ctx.getImageData(0, 0, cameraCanvas.width, cameraCanvas.height);
+                    const code = decodeQrFromCanvas(cameraCanvas);
+                    if (code) {
                         camLock = true;
-                        const d = handleQR(decoded);
+                        const d = handleQR(code.data);
                         setTimeout(() => { camLock = false; }, d || 1000);
                     }
                 }
@@ -1079,65 +1107,25 @@
             return 1500;
         }
 
-        // Decode normal and stylized QR images using several safe image passes.
-        // The original QR artwork is kept unchanged; only the scanner input is enhanced.
-        function decodeQrFromCanvas(sourceCanvas) {
-            const run = (canvas) => {
-                const c = canvas.getContext('2d', { willReadFrequently: true });
-                const data = c.getImageData(0, 0, canvas.width, canvas.height);
-                const found = jsQR(data.data, data.width, data.height, { inversionAttempts: 'attemptBoth' });
-                return found && found.data ? found.data.trim() : null;
-            };
-            let result = run(sourceCanvas);
-            if (result) return result;
-            // Upscale small/soft camera photos to make rounded QR modules easier to detect.
-            const scaled = document.createElement('canvas');
-            const factor = Math.min(3, Math.max(2, Math.ceil(900 / Math.max(sourceCanvas.width, sourceCanvas.height))));
-            scaled.width = sourceCanvas.width * factor; scaled.height = sourceCanvas.height * factor;
-            const sx = scaled.getContext('2d', { willReadFrequently: true });
-            sx.imageSmoothingEnabled = false; sx.drawImage(sourceCanvas, 0, 0, scaled.width, scaled.height);
-            result = run(scaled);
-            if (result) return result;
-            // High-contrast grayscale pass helps with screenshots, glare and pale backgrounds.
-            const gray = document.createElement('canvas'); gray.width = scaled.width; gray.height = scaled.height;
-            const gx = gray.getContext('2d', { willReadFrequently: true }); gx.drawImage(scaled, 0, 0);
-            const pixels = gx.getImageData(0, 0, gray.width, gray.height);
-            for (let i = 0; i < pixels.data.length; i += 4) {
-                const v = Math.round(pixels.data[i] * 0.299 + pixels.data[i + 1] * 0.587 + pixels.data[i + 2] * 0.114);
-                const contrast = Math.max(0, Math.min(255, (v - 128) * 1.55 + 128));
-                pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = contrast;
-                pixels.data[i + 3] = 255;
-            }
-            gx.putImageData(pixels, 0, 0);
-            result = run(gray);
-            if (result) return result;
-            // Binary threshold as a final fallback.
-            const bin = gx.getImageData(0, 0, gray.width, gray.height);
-            for (let i = 0; i < bin.data.length; i += 4) {
-                const v = bin.data[i] < 165 ? 0 : 255;
-                bin.data[i] = bin.data[i + 1] = bin.data[i + 2] = v;
-            }
-            gx.putImageData(bin, 0, 0);
-            return run(gray);
-        }
-
         document.getElementById('qr-hidden-input').onchange = async e => {
             const file = e.target.files[0]; if (!file) return;
             const url = URL.createObjectURL(file);
             const imgEl = document.getElementById('process-image');
+            imgEl.src = url;
             imgEl.onload = async () => {
                 try {
-                    const cv = document.createElement('canvas');
+                    let text = null;
+                    const cv = document.createElement('canvas'), cx = cv.getContext('2d');
                     cv.width = imgEl.naturalWidth; cv.height = imgEl.naturalHeight;
-                    cv.getContext('2d').drawImage(imgEl, 0, 0);
-                    const text = decodeQrFromCanvas(cv);
-                    if (!text) { showCamToast('No QR found in image. Try a clearer, closer photo.'); return; }
+                    cx.drawImage(imgEl, 0, 0);
+                    const code = decodeQrFromCanvas(cv);
+                    if (code && code.data) text = code.data.trim();
+                    URL.revokeObjectURL(url);
+                    e.target.value = "";
+                    if (!text) { showCamToast('No QR found in image'); return; }
                     handleQR(text);
-                } catch(err) { showCamToast('Error processing image'); }
-                finally { URL.revokeObjectURL(url); e.target.value = ''; }
+                } catch(err) { showCamToast('Error processing image'); URL.revokeObjectURL(url); e.target.value = ""; }
             };
-            imgEl.onerror = () => { URL.revokeObjectURL(url); e.target.value = ''; showCamToast('Could not open image'); };
-            imgEl.src = url;
         };
 
         // ============================================================
@@ -1308,12 +1296,13 @@
                 });
                 const qrImg = await svgToImg(qrSvgEl);
                 const qy = (H - qrSize) / 2;
-                // Paint a clean white quiet zone over the template's dotted QR frame.
-                ctx.save(); ctx.fillStyle = '#ffffff';
-                roundRectPath(ctx, qrX - 10 * S, qy - 10 * S, qrSize + 20 * S, qrSize + 20 * S, 3 * S);
-                ctx.fill(); ctx.restore();
                 if (qrImg) { ctx.imageSmoothingEnabled = true; ctx.drawImage(qrImg, qrX, qy, qrSize, qrSize); }
-                // Keep the QR's original rounded-dot artwork; no decorative border is drawn around it.
+                // The QR SVG already contains 3.png with transparent background and a cleared center gap.
+                if (!ID_LOGO_IMG) {
+                    // Keep the QR fallback label, but never draw a dotted/dashed frame around the QR.
+                    ctx.fillStyle = '#6b7280'; ctx.font = `700 ${28}px Inter, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText('QR', qrX + qrSize / 2, qy + qrSize / 2); ctx.textBaseline = 'top';
+                }
             }
             ctx.restore();
             return cv;
