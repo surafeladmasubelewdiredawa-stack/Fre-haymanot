@@ -242,8 +242,8 @@
                 <div><label class="block text-sm font-medium text-gray-300 mb-1">Church Name</label><input type="text" id="inp-church" value="Fre Haymanot" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
                 <div><label class="block text-sm font-medium text-gray-300 mb-1">Christ Name</label><input type="text" id="inp-christ" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="block text-sm font-medium text-gray-300 mb-1">First Name</label><input type="text" id="inp-first" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
-                    <div><label class="block text-sm font-medium text-gray-300 mb-1">Last Name</label><input type="text" id="inp-last" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
+                    <div><label class="block text-sm font-medium text-gray-300 mb-1">First Name</label><input type="text" id="inp-first" placeholder="" autocomplete="given-name" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"><p id="first-name-error" class="hidden mt-1 text-xs text-red-400" aria-live="polite"></p></div>
+                    <div><label class="block text-sm font-medium text-gray-300 mb-1">Last Name</label><input type="text" id="inp-last" placeholder="" autocomplete="family-name" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"><p id="last-name-error" class="hidden mt-1 text-xs text-red-400" aria-live="polite"></p></div>
                 </div>
                 <button onclick="goToStep(2)" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-4 rounded-xl mt-6 active:scale-[0.98] shadow-lg shadow-indigo-500/30 transition-all">Next</button>
             </div>
@@ -275,7 +275,7 @@
                     <div id="class-picker" class="hidden absolute z-50 left-0 right-0 top-full mt-2 p-2 rounded-xl border border-gray-600 bg-gray-900 shadow-2xl grid grid-cols-4 gap-2"><button type="button" onclick="chooseClass(1,event)" class="class-choice">1</button><button type="button" onclick="chooseClass(2,event)" class="class-choice">2</button><button type="button" onclick="chooseClass(3,event)" class="class-choice">3</button><button type="button" onclick="chooseClass(4,event)" class="class-choice">4</button><button type="button" onclick="chooseClass(5,event)" class="class-choice">5</button><button type="button" onclick="chooseClass(6,event)" class="class-choice">6</button><button type="button" onclick="chooseClass(7,event)" class="class-choice">7</button><button type="button" onclick="chooseClass(8,event)" class="class-choice">8</button></div></div></div>
                 <div class="flex gap-3 mt-6">
                     <button onclick="goToStep(1)" class="w-1/3 bg-gray-700/60 backdrop-blur-sm text-white font-semibold py-4 rounded-xl border border-gray-600 shadow-sm active:bg-gray-600 transition-all">Back</button>
-                    <button onclick="finishRegistration()" class="w-2/3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-4 rounded-xl active:scale-[0.98] shadow-lg shadow-indigo-500/30 transition-all">Finish</button>
+                    <button type="button" onclick="finishRegistration()" class="w-2/3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-4 rounded-xl active:scale-[0.98] shadow-lg shadow-indigo-500/30 transition-all">Finish</button>
                 </div>
             </div>
         </div>
@@ -714,7 +714,7 @@
         }
 
         function getAttendanceData() { return JSON.parse(localStorage.getItem('churchAttendance')) || {}; }
-        function saveAttendanceData(data) { localStorage.setItem('churchAttendance', JSON.stringify(data)); if (typeof idbSet === 'function') idbSet('churchAttendance', data); if (typeof pushAttendanceToFirebase === 'function') pushAttendanceToFirebase(); }
+        function saveAttendanceData(data) { localStorage.setItem('churchAttendance', JSON.stringify(data)); if (typeof idbSet === 'function') idbSet('churchAttendance', data); if (!applyingRemote && typeof markCloudPending === 'function') markCloudPending('pending_attendance_sync'); if (typeof pushAttendanceToFirebase === 'function') pushAttendanceToFirebase(); }
 
         function openAttendanceTable(classNum) {
             currentClass = classNum;
@@ -770,6 +770,43 @@
             });
         }
 
+        function clearStudentNameErrors() {
+            ['first-name-error','last-name-error'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.textContent = ''; el.classList.add('hidden'); }
+            });
+            ['inp-first','inp-last'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.borderColor = '';
+            });
+        }
+        function validateStudentName() {
+            clearStudentNameErrors();
+            const firstEl = document.getElementById('inp-first');
+            const lastEl = document.getElementById('inp-last');
+            const first = String(firstEl.value || '').trim();
+            const last = String(lastEl.value || '').trim();
+            if (!first || !last) return true; // Required-field validation handles blanks.
+            const norm = value => value.toLocaleLowerCase().replace(/\s+/g, ' ').trim();
+            let message = '';
+            if (norm(first) === norm(last)) {
+                message = 'First name and Last name cannot be the same.';
+            } else {
+                const duplicate = students.some(st => st.id !== editingStudentId &&
+                    norm(st.firstName || '') === norm(first) && norm(st.lastName || '') === norm(last));
+                if (duplicate) message = 'This student is already registered.';
+            }
+            if (message) {
+                [['first-name-error', firstEl], ['last-name-error', lastEl]].forEach(([id, input]) => {
+                    const error = document.getElementById(id);
+                    if (error) { error.textContent = message; error.classList.remove('hidden'); }
+                    input.style.borderColor = '#ef4444';
+                });
+                return false;
+            }
+            return true;
+        }
+
         function goToStep(step) {
             if (step === 1) {
                 document.getElementById('form-step-1').classList.remove('hidden');
@@ -796,6 +833,7 @@
                 }
             });
             if (firstMissing) { firstMissing.focus(); return; }
+            if (!validateStudentName()) { document.getElementById('inp-first').focus(); return; }
             document.getElementById('form-step-1').classList.add('hidden');
             document.getElementById('form-step-2').classList.remove('hidden');
         }
@@ -825,6 +863,7 @@
             const student = students.find(st => st.id === currentStudentId);
             if (!student) return;
             editingStudentId = student.id;
+            clearStudentNameErrors();
             document.getElementById('inp-church').value = student.churchName || 'Fre Haymanot';
             document.getElementById('inp-christ').value = student.christName || '';
             document.getElementById('inp-first').value = student.firstName || '';
@@ -924,10 +963,16 @@
         }
 
 
-        document.addEventListener('input', (event) => { const el = event.target; if (el && el.matches('#inp-church, #inp-christ, #inp-first, #inp-last, #inp-age, #inp-sex, #inp-phone, #inp-emer-name, #inp-emer-phone, #inp-class')) { el.placeholder = ''; el.classList.remove('validation-placeholder'); el.style.borderColor = ''; } });
+        document.addEventListener('input', (event) => { const el = event.target; if (el && el.matches('#inp-church, #inp-christ, #inp-first, #inp-last, #inp-age, #inp-sex, #inp-phone, #inp-emer-name, #inp-emer-phone, #inp-class')) { el.placeholder = ''; el.classList.remove('validation-placeholder'); if (!el.matches('#inp-first, #inp-last')) el.style.borderColor = ''; if (el.matches('#inp-first, #inp-last')) validateStudentName(); } });
 
         function finishRegistration() {
-            if (!validateRegistrationFields()) return;
+            try {
+            if (!validateRegistrationFields()) {
+                const step2 = document.getElementById('form-step-2');
+                if (step2 && !step2.classList.contains('hidden')) return;
+                return;
+            }
+            if (!validateStudentName()) { document.getElementById('inp-first').focus(); return; }
             const cClass = document.getElementById('inp-class').value.trim();
             const values = {
                 churchName: document.getElementById('inp-church').value.trim(),
@@ -965,6 +1010,7 @@
             persistStudents();
             showModal('Registration Successful', `Student ${student.firstName} has been saved successfully with ID: ${student.id}`);
             base64Image = null;
+            clearStudentNameErrors();
             document.getElementById('img-preview-box').classList.add('hidden');
             document.getElementById('img-preview-box').classList.remove('flex');
             document.getElementById('img-preview').src = '';
@@ -977,6 +1023,7 @@
             const sexPicker = document.getElementById('sex-picker');
             if (sexPicker) sexPicker.classList.add('hidden');
             goToStep(1); switchNavTab('class');
+            } catch (error) { console.error('Finish registration failed:', error); showToastApp('Could not save student. Please check the fields and try again.'); }
         }
         function getCleanClassNumber(str) { if(!str) return ""; return str.toLowerCase().replace(/[^0-9]/g, ''); }
 
@@ -1898,6 +1945,10 @@
                     localStorage.setItem('churchAttHistory', JSON.stringify(h));
                     restored = true;
                 }
+                for (const pendingKey of ['pending_students_sync', 'pending_attendance_sync']) {
+                    const pendingValue = await idbGet(pendingKey);
+                    if (pendingValue === '1' && localStorage.getItem(pendingKey) !== '1') localStorage.setItem(pendingKey, '1');
+                }
                 if (restored) {
                     refreshVisibleViews();
                     autoOpenFirstStudentID();
@@ -1908,22 +1959,50 @@
         if (navigator.storage && navigator.storage.persist) { try { navigator.storage.persist(); } catch (e) {} }
 
         // ---- Students + Attendance cloud sync (cross-device) ----
+        // Offline-first queue: every local change is marked pending BEFORE any cloud request.
+        // The localStorage copy is immediate; IndexedDB is the durable offline backup.
+        function markCloudPending(key) {
+            localStorage.setItem(key, '1');
+            if (typeof idbSet === 'function') idbSet(key, '1');
+        }
+        function clearCloudPending(key) {
+            localStorage.removeItem(key);
+            if (typeof idbSet === 'function') idbSet(key, null);
+        }
         function persistStudents() {
             localStorage.setItem('churchStudents', JSON.stringify(students));
-            idbSet('churchStudents', students);
+            if (typeof idbSet === 'function') idbSet('churchStudents', students);
+            if (!applyingRemote) markCloudPending('pending_students_sync');
             pushStudentsToFirebase();
         }
         async function pushStudentsToFirebase() {
             if (!fbReady || !navigator.onLine || applyingRemote) return;
+            const snapshot = JSON.stringify(students);
             setSyncBadge('syncing');
-            try { await fb.set(fb.studentsRef, JSON.parse(JSON.stringify(students))); setSyncBadge('on'); }
-            catch (e) { console.warn('Students sync failed:', e); setSyncBadge('off'); }
+            try {
+                await fb.set(fb.studentsRef, JSON.parse(snapshot));
+                // Do not clear a newer edit made while this upload was in flight.
+                if (JSON.stringify(students) === snapshot) clearCloudPending('pending_students_sync');
+                setSyncBadge('on');
+            } catch (e) {
+                markCloudPending('pending_students_sync');
+                console.warn('Students sync failed; will retry when online:', e);
+                setSyncBadge('off');
+            }
         }
         async function pushAttendanceToFirebase() {
             if (!fbReady || !navigator.onLine || applyingRemote) return;
+            const snapshot = JSON.stringify(getAttendanceData());
             setSyncBadge('syncing');
-            try { await fb.set(fb.attRef, getAttendanceData()); setSyncBadge('on'); }
-            catch (e) { console.warn('Attendance sync failed:', e); setSyncBadge('off'); }
+            try {
+                await fb.set(fb.attRef, JSON.parse(snapshot));
+                if (JSON.stringify(getAttendanceData()) === snapshot) clearCloudPending('pending_attendance_sync');
+                setSyncBadge('on');
+            } catch (e) {
+                markCloudPending('pending_attendance_sync');
+                console.warn('Attendance sync failed; will retry when online:', e);
+                setSyncBadge('off');
+            }
         }
         function refreshVisibleViews() {
             const visible = [...document.querySelectorAll('.app-view')].find(v => !v.classList.contains('hidden'));
@@ -1937,6 +2016,11 @@
             if (!fbReady) return;
             if (unsubscribeStudents) { try { unsubscribeStudents(); } catch (e) {} }
             unsubscribeStudents = fb.onValue(fb.studentsRef, (snap) => {
+                if (localStorage.getItem('pending_students_sync') === '1') {
+                    // Local offline adds/edits/deletes win until safely uploaded.
+                    pushStudentsToFirebase();
+                    return;
+                }
                 if (snap.exists()) {
                     let cloud = Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val());
                     const filtered = cloud.filter(s => !SAMPLE_STUDENT_IDS.includes(String(s.id)));
@@ -1959,6 +2043,11 @@
             }, (err) => { console.error('Firebase students error:', err); });
             if (unsubscribeAtt) { try { unsubscribeAtt(); } catch (e) {} }
             unsubscribeAtt = fb.onValue(fb.attRef, (snap) => {
+                if (localStorage.getItem('pending_attendance_sync') === '1') {
+                    // Preserve offline attendance marks/changes and upload them first.
+                    pushAttendanceToFirebase();
+                    return;
+                }
                 if (snap.exists()) {
                     let cloud = snap.val();
                     let hadSamples = false;
@@ -2017,12 +2106,24 @@
             migrateLocalHistoryToCloud();
             await syncPendingHistoryToFirebase();
             await syncPendingHistoryDeletions();
+            if (localStorage.getItem('pending_students_sync') === '1') await pushStudentsToFirebase();
+            if (localStorage.getItem('pending_attendance_sync') === '1') await pushAttendanceToFirebase();
             loadHistoryFromFirebase();
             subscribeCloudData();
         }
         window.addEventListener('online', async () => {
             if (!fbReady) await loadFirebase();
-            if (fbReady) { await syncPendingHistoryToFirebase(); await syncPendingHistoryDeletions(); loadHistoryFromFirebase(); pushStudentsToFirebase(); pushAttendanceToFirebase(); subscribeCloudData(); }
+            if (fbReady) {
+                // Upload queued local changes first; only then listen for cloud updates.
+                await syncPendingHistoryToFirebase();
+                await syncPendingHistoryDeletions();
+                if (localStorage.getItem('pending_students_sync') === '1') await pushStudentsToFirebase();
+                if (localStorage.getItem('pending_attendance_sync') === '1') await pushAttendanceToFirebase();
+                loadHistoryFromFirebase();
+                pushStudentsToFirebase();
+                pushAttendanceToFirebase();
+                subscribeCloudData();
+            }
         });
 
         // ---- Archive (Move to History) ----
