@@ -764,7 +764,7 @@
             });
         }
 
-        function goToStep(step) { if (step === 1) { document.getElementById('form-step-1').classList.remove('hidden'); document.getElementById('form-step-2').classList.add('hidden'); } else { const first = document.getElementById('inp-first').value.trim(); if (!first) { showModal('Validation Error', 'First name is required before proceeding.'); return; } document.getElementById('form-step-1').classList.add('hidden'); document.getElementById('form-step-2').classList.remove('hidden'); } }
+        function goToStep(step) { if (step === 1) { document.getElementById('form-step-1').classList.remove('hidden'); document.getElementById('form-step-2').classList.add('hidden'); } else { const firstEl = document.getElementById('inp-first'); const first = firstEl.value.trim(); if (!first) { firstEl.placeholder = 'Please enter First Name'; firstEl.classList.add('validation-placeholder'); firstEl.style.borderColor = '#ef4444'; firstEl.focus(); return; } document.getElementById('form-step-1').classList.add('hidden'); document.getElementById('form-step-2').classList.remove('hidden'); } }
         function handleImageSelect(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { base64Image = e.target.result; document.getElementById('img-preview').src = base64Image; document.getElementById('img-preview-box').classList.remove('hidden'); document.getElementById('img-preview-box').classList.add('flex'); }; reader.readAsDataURL(file); }
         function toggleClassPicker(e) {
             if (e) e.stopPropagation();
