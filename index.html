@@ -1493,8 +1493,20 @@
         function classStudentsOf(n) { return students.filter(s => getCleanClassNumber(s.className) == n); }
         function maxMarkOfClass(n) {
             const d = getAttendanceData(); let mx = 0;
-            classStudentsOf(n).forEach(s => { const m = d[s.id] || []; for (let i = 0; i < 26; i++) if (m[i] && m[i] !== '') mx = Math.max(mx, i + 1); });
+            classStudentsOf(n).forEach(s => { const m = d[s.id] || []; for (let i = 0; i < 26; i++) if (String(m[i] ?? '') !== '') mx = Math.max(mx, i + 1); });
             return mx;
+        }
+        // Resume the first column that is not complete for every student.
+        // This lets scanning continue in M3 (or any other mark) if a session
+        // was interrupted after only some students were scanned.
+        function nextIncompleteMarkOfClass(n) {
+            const list = classStudentsOf(n);
+            if (!list.length) return 1;
+            const d = getAttendanceData();
+            for (let i = 0; i < 26; i++) {
+                if (list.some(st => String(((d[st.id] || [])[i]) ?? '') === '')) return i + 1;
+            }
+            return 27;
         }
         function fmtCountdown(sec) { return `0:${String(Math.max(0, sec)).padStart(2, '0')}`; }
 
@@ -1555,7 +1567,7 @@
         // ---- Session lifecycle ----
         function beginSession(classNum) {
             if (!classStudentsOf(classNum).length) { showToastApp('No students in this class'); return false; }
-            const mark = maxMarkOfClass(classNum) + 1;
+            const mark = nextIncompleteMarkOfClass(classNum);
             if (mark > 26) { showToastApp('All 26 marks are filled for this class'); return false; }
             // Countdown does NOT start here — it starts on the first successful scan
             scanSessions[classNum] = { classNum, mark, end: null, scanned: {}, timer: null };
@@ -1609,6 +1621,9 @@
             const saved = loadSavedSession();
             Object.keys(saved).forEach(cn => {
                 const st = saved[cn];
+                const resumeMark = nextIncompleteMarkOfClass(st.classNum);
+                if (resumeMark > 26) { return; }
+                st.mark = resumeMark;
                 if (st.end === null || st.end === undefined) {
                     // waiting session (no successful scan yet) — restore without countdown
                     const s = { classNum: st.classNum, mark: st.mark, end: null, scanned: {}, timer: null };
