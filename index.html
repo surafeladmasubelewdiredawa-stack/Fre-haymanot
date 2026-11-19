@@ -960,7 +960,7 @@
                 return;
             }
             const randomId = 'STU-' + Math.floor(1000 + Math.random() * 9000);
-            const student = { id: randomId, ...values, startMark: maxMarkOfClass(getCleanClassNumber(cClass)) + 1 };
+            const student = { id: randomId, ...values, startMark: nextIncompleteMarkOfClass(getCleanClassNumber(cClass)) };
             students.push(student);
             persistStudents();
             showModal('Registration Successful', `Student ${student.firstName} has been saved successfully with ID: ${student.id}`);
@@ -1496,15 +1496,20 @@
             classStudentsOf(n).forEach(s => { const m = d[s.id] || []; for (let i = 0; i < 26; i++) if (String(m[i] ?? '') !== '') mx = Math.max(mx, i + 1); });
             return mx;
         }
-        // Resume the first column that is not complete for every student.
-        // This lets scanning continue in M3 (or any other mark) if a session
-        // was interrupted after only some students were scanned.
+        // Resume the first mark that is still incomplete for students who
+        // were already registered by that mark. A newly registered student
+        // must not make earlier columns look incomplete.
         function nextIncompleteMarkOfClass(n) {
             const list = classStudentsOf(n);
             if (!list.length) return 1;
             const d = getAttendanceData();
             for (let i = 0; i < 26; i++) {
-                if (list.some(st => String(((d[st.id] || [])[i]) ?? '') === '')) return i + 1;
+                const incomplete = list.some(st => {
+                    const firstMark = Math.max(1, Math.min(26, parseInt(st.startMark, 10) || 1));
+                    if (i + 1 < firstMark) return false;
+                    return String(((d[st.id] || [])[i]) ?? '') === '';
+                });
+                if (incomplete) return i + 1;
             }
             return 27;
         }
@@ -1578,6 +1583,8 @@
         function markAbsentForClass(classNum, mark) {
             const d = getAttendanceData(); const touched = [];
             classStudentsOf(classNum).forEach(s => {
+                const firstMark = Math.max(1, Math.min(26, parseInt(s.startMark, 10) || 1));
+                if (mark < firstMark) return; // before this student's registration
                 if (!d[s.id]) d[s.id] = Array(26).fill('');
                 if ((d[s.id][mark - 1] || '') === '') { d[s.id][mark - 1] = '0'; touched.push(s.id); }
             });
