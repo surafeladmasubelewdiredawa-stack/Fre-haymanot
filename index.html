@@ -153,7 +153,9 @@
         .idp-btn:active{transform:scale(.97)}
         .idp-btn-next{background:linear-gradient(135deg,#d4a03c,#b8882e);border-color:#d4a03c;color:#fff}
         .idp-btn-next:hover{box-shadow:0 0 20px rgba(212,160,60,.35);transform:translateY(-2px)}
-    </style>
+    
+        .validation-placeholder::placeholder { color: #ef4444 !important; opacity: 1; }
+</style>
 </head>
 <body>
 
@@ -237,7 +239,7 @@
             <h2 class="text-lg font-bold mb-3 text-white tracking-tight">Register</h2>
             <div id="form-step-1" class="space-y-4 fade-in">
                 <div class="flex items-center justify-between mb-2"><span class="text-sm font-semibold text-gray-400">Step 1 of 2</span></div>
-                <div><label class="block text-sm font-medium text-gray-300 mb-1">Church Name</label><input type="text" id="inp-church" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
+                <div><label class="block text-sm font-medium text-gray-300 mb-1">Church Name</label><input type="text" id="inp-church" value="Fre Haymanot" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
                 <div><label class="block text-sm font-medium text-gray-300 mb-1">Christ Name</label><input type="text" id="inp-christ" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="block text-sm font-medium text-gray-300 mb-1">First Name</label><input type="text" id="inp-first" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
@@ -434,7 +436,7 @@
             classNameText: { fontSize: "14px", fontWeight: "700", color: "#4f46e5", marginTop: "10px", marginBottom: "10px", marginLeft: "0px", marginRight: "20px" },
             detailsText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelWidth: "80px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
             profilePic: { width: "96px", height: "96px", borderRadius: "50%", border: "3px #EdB200", ringGap: "4px", marginTop: "50px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
-            logoAboveName: { size: 28, dx: 0, dy: 0, left: 0, right: 0, up: 50, down: 0 },
+            logoAboveName: { size: 28, dx: 0, dy: 0, left: 0, right: 0, up: 0, down: 0 },
             qrLogo: { size: 40, dx: 0, dy: 0 },
             qrCode: { width: 180, height: 180, bgColor: "transparent", borderRadius: "0px", padding: "0px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px", dotsColor: "#000000", dotsType: "rounded", cornersSquareColor: "#000000", cornersSquareType: "extra-rounded", cornersDotColor: "#000000", cornersDotType: "dot" },
             emergencyText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelFontSize: "10px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" }
@@ -451,7 +453,7 @@
             classNameText: { fontSize: "14px", fontWeight: "700", color: "#4f46e5", marginTop: "10px", marginBottom: "10px", marginLeft: "0px", marginRight: "20px" },
             detailsText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelWidth: "80px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
             profilePic: { width: "96px", height: "96px", borderRadius: "50%", border: "3px #EdB200", ringGap: "4px", marginTop: "50px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
-            logoAboveName: { size: 28, dx: 0, dy: 0, left: 0, right: 0, up: 50, down: 0 },
+            logoAboveName: { size: 28, dx: 0, dy: 0, left: 0, right: 0, up: 0, down: 0 },
             qrLogo: { size: 40, dx: 0, dy: 0 },
             qrCode: { width: 180, height: 180, bgColor: "transparent", borderRadius: "0px", padding: "0px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px", dotsColor: "#000000", dotsType: "rounded", cornersSquareColor: "#000000", cornersSquareType: "extra-rounded", cornersDotColor: "#000000", cornersDotType: "dot" },
             emergencyText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelFontSize: "10px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" }
@@ -772,7 +774,7 @@
         function chooseClass(n, e) {
             if (e) e.stopPropagation();
             const field = document.getElementById('inp-class');
-            if (field) { field.value = `Class ${n}`; field.placeholder = ''; field.style.borderColor = ''; }
+            if (field) { field.value = `Class ${n}`; field.placeholder = ''; field.classList.remove('validation-placeholder'); field.style.borderColor = ''; }
             const picker = document.getElementById('class-picker');
             if (picker) picker.classList.add('hidden');
         }
@@ -788,24 +790,23 @@
                 ['inp-emer-name','Emergency Name'], ['inp-emer-phone','Emergency Phone'],
                 ['inp-class','Class']
             ];
-            fields.forEach(([id]) => { const el = document.getElementById(id); if (el) el.placeholder = ''; });
+            fields.forEach(([id]) => { const el = document.getElementById(id); if (el) { el.placeholder = ''; el.classList.remove('validation-placeholder'); } });
             for (const [id, label] of fields) {
                 const el = document.getElementById(id);
                 if (el && !String(el.value || '').trim()) {
                     el.placeholder = id === 'inp-class' ? 'Please choose Class' : `Please enter ${label}`;
+                    el.classList.add('validation-placeholder');
                     el.style.borderColor = '#ef4444';
                     el.focus();
-                    if (id === 'inp-class') {
-                        const picker = document.getElementById('class-picker');
-                        if (picker) picker.classList.remove('hidden');
-                    }
                     return false;
                 } else if (el) el.style.borderColor = '';
             }
             return true;
         }
 
-        function finishRegistration() { if (!validateRegistrationFields()) return; const cClass = document.getElementById('inp-class').value.trim(); const randomId = 'STU-' + Math.floor(1000 + Math.random() * 9000); const student = { id: randomId, churchName: document.getElementById('inp-church').value.trim(), christName: document.getElementById('inp-christ').value.trim(), firstName: document.getElementById('inp-first').value.trim(), lastName: document.getElementById('inp-last').value.trim(), age: document.getElementById('inp-age').value.trim(), sex: document.getElementById('inp-sex').value, phone: document.getElementById('inp-phone').value.trim(), emerName: document.getElementById('inp-emer-name').value.trim(), emerPhone: document.getElementById('inp-emer-phone').value.trim(), className: cClass, pic: base64Image, startMark: maxMarkOfClass(getCleanClassNumber(cClass)) + 1 }; students.push(student); persistStudents(); showModal('Registration Successful', `Student ${student.firstName} has been saved successfully with ID: ${student.id}`); base64Image = null; document.getElementById('img-preview-box').classList.add('hidden'); document.getElementById('img-preview-box').classList.remove('flex'); document.getElementById('img-preview').src = ''; ['inp-church', 'inp-christ', 'inp-first', 'inp-last', 'inp-age', 'inp-phone', 'inp-emer-name', 'inp-emer-phone', 'inp-class'].forEach(id => { const el = document.getElementById(id); if (el) { el.value = ''; el.placeholder = ''; el.style.borderColor = ''; } }); const classPicker = document.getElementById('class-picker'); if (classPicker) classPicker.classList.add('hidden'); const sexEl = document.getElementById('inp-sex'); if (sexEl) sexEl.value = 'Male'; goToStep(1); switchNavTab('class'); }
+        document.addEventListener('input', (event) => { const el = event.target; if (el && el.matches('#inp-church, #inp-christ, #inp-first, #inp-last, #inp-age, #inp-phone, #inp-emer-name, #inp-emer-phone, #inp-class')) { el.placeholder = ''; el.classList.remove('validation-placeholder'); el.style.borderColor = ''; } });
+
+        function finishRegistration() { if (!validateRegistrationFields()) return; const cClass = document.getElementById('inp-class').value.trim(); const randomId = 'STU-' + Math.floor(1000 + Math.random() * 9000); const student = { id: randomId, churchName: document.getElementById('inp-church').value.trim(), christName: document.getElementById('inp-christ').value.trim(), firstName: document.getElementById('inp-first').value.trim(), lastName: document.getElementById('inp-last').value.trim(), age: document.getElementById('inp-age').value.trim(), sex: document.getElementById('inp-sex').value, phone: document.getElementById('inp-phone').value.trim(), emerName: document.getElementById('inp-emer-name').value.trim(), emerPhone: document.getElementById('inp-emer-phone').value.trim(), className: cClass, pic: base64Image, startMark: maxMarkOfClass(getCleanClassNumber(cClass)) + 1 }; students.push(student); persistStudents(); showModal('Registration Successful', `Student ${student.firstName} has been saved successfully with ID: ${student.id}`); base64Image = null; document.getElementById('img-preview-box').classList.add('hidden'); document.getElementById('img-preview-box').classList.remove('flex'); document.getElementById('img-preview').src = ''; ['inp-church', 'inp-christ', 'inp-first', 'inp-last', 'inp-age', 'inp-phone', 'inp-emer-name', 'inp-emer-phone', 'inp-class'].forEach(id => { const el = document.getElementById(id); if (el) { el.value = id === 'inp-church' ? 'Fre Haymanot' : ''; el.placeholder = ''; el.classList.remove('validation-placeholder'); el.style.borderColor = ''; } }); const classPicker = document.getElementById('class-picker'); if (classPicker) classPicker.classList.add('hidden'); const sexEl = document.getElementById('inp-sex'); if (sexEl) sexEl.value = 'Male'; goToStep(1); switchNavTab('class'); }
         function getCleanClassNumber(str) { if(!str) return ""; return str.toLowerCase().replace(/[^0-9]/g, ''); }
 
         let videoStream = null, camInterval = null;
