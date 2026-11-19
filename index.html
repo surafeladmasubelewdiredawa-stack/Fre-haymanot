@@ -565,7 +565,7 @@
                     <div style="text-align:center;padding-left:${Math.round(16 * K)}px;padding-right:${Math.round(16 * K)}px;">
                         <h4 style="font-size: ${C.fontSize}; font-weight: ${C.fontWeight}; color: ${C.color}; margin-top: ${C.marginTop}; margin-bottom: ${C.marginBottom}; margin-left: ${C.marginLeft}; margin-right: ${C.marginRight}; letter-spacing: 0.05em; line-height: 1.2;">Mekane semaet K/Estifanos Betekrstiyan fre Haymanot S/T/Bet</h4>
                     </div>
-                    <div style="flex:1;display:flex;align-items:center;justify-content:space-between;gap:${Math.round(16 * K)}px;margin-top:${Math.round(8 * K)}px;padding:${Math.round(8 * K)}px;">
+                    <div style="flex:1;display:flex;align-items:center;justify-content:space-between;gap:${Math.round(16 * K)}px;margin-top:${Math.round(-12 * K)}px;padding:${Math.round(8 * K)}px;">
                         <div style="font-size: ${D.fontSize}; font-weight: ${D.fontWeight}; color: ${D.color}; margin-top: ${D.marginTop}; margin-bottom: ${D.marginBottom}; margin-left: ${D.marginLeft}; margin-right: ${D.marginRight}; padding: ${Math.round(8 * K)}px; flex: 1; line-height: 1.5;">
                             ${logo}
                             ${row('Full Name :', `${student.firstName} ${student.lastName}`)}
@@ -1299,7 +1299,7 @@
                 const wrapS = photoS + 2 * (ringGap + ringW);
                 const blockH = Math.max(wrapS, colH);
                 const zoneTop = headerBottom + 8, zoneBottom = H - PAD;
-                const blockY = zoneTop + Math.max((zoneBottom - zoneTop - blockH) / 2, 0);
+                const blockY = zoneTop + Math.max((zoneBottom - zoneTop - blockH) / 2, 0) - 20 * S;
 
                 const picImg = await loadImgSafe(student.pic);
                 const wrapX = W - PAD - wrapS, wrapY = blockY + (blockH - wrapS) / 2;
