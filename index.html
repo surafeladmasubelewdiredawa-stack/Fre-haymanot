@@ -236,7 +236,7 @@
 
         <!-- TAB 3: NEW REGISTRATION FORM -->
         <div id="view-new-root" class="app-view hidden px-4 pt-2 pb-20 bg-transparent">
-            <h2 class="text-lg font-bold mb-3 text-white tracking-tight">Register</h2>
+            <div class="flex items-center justify-between mb-3"><h2 class="text-lg font-bold text-white tracking-tight">Register</h2><button id="edit-cancel-btn" onclick="cancelEditStudent()" class="hidden bg-gray-700 hover:bg-gray-600 text-white text-sm font-semibold px-4 py-2 rounded-lg">Cancel</button></div>
             <div id="form-step-1" class="space-y-4 fade-in">
                 <div class="flex items-center justify-between mb-2"><span class="text-sm font-semibold text-gray-400">Step 1 of 2</span></div>
                 <div><label class="block text-sm font-medium text-gray-300 mb-1">Church Name</label><input type="text" id="inp-church" value="Fre Haymanot" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
@@ -845,11 +845,32 @@
                 previewBox.classList.add('hidden'); previewBox.classList.remove('flex');
             }
             document.querySelector('#view-new-root h2').innerText = 'Edit Student';
+            const cancelBtn = document.getElementById('edit-cancel-btn');
+            if (cancelBtn) cancelBtn.classList.remove('hidden');
             const finishBtn = document.querySelector('#form-step-2 button[onclick="finishRegistration()"]');
             if (finishBtn) finishBtn.innerText = 'Save Changes';
             document.getElementById('form-step-1').classList.remove('hidden');
             document.getElementById('form-step-2').classList.add('hidden');
             showView('new-root');
+        }
+
+        function cancelEditStudent() {
+            const studentId = editingStudentId || currentStudentId;
+            editingStudentId = null;
+            base64Image = null;
+            document.querySelector('#view-new-root h2').innerText = 'Register';
+            const finishBtn = document.querySelector('#form-step-2 button[onclick="finishRegistration()"]');
+            if (finishBtn) finishBtn.innerText = 'Finish';
+            const cancelBtn = document.getElementById('edit-cancel-btn');
+            if (cancelBtn) cancelBtn.classList.add('hidden');
+            document.getElementById('form-step-1').classList.remove('hidden');
+            document.getElementById('form-step-2').classList.add('hidden');
+            const sexPicker = document.getElementById('sex-picker');
+            const classPicker = document.getElementById('class-picker');
+            if (sexPicker) sexPicker.classList.add('hidden');
+            if (classPicker) classPicker.classList.add('hidden');
+            if (studentId) openStudentDetail(studentId);
+            else showView('home-root');
         }
 
         function toggleClassPicker(e) {
@@ -929,6 +950,8 @@
                 editingStudentId = null;
                 persistStudents();
                 document.querySelector('#view-new-root h2').innerText = 'Register';
+                const cancelBtn = document.getElementById('edit-cancel-btn');
+                if (cancelBtn) cancelBtn.classList.add('hidden');
                 const finishBtn = document.querySelector('#form-step-2 button[onclick="finishRegistration()"]');
                 if (finishBtn) finishBtn.innerText = 'Finish';
                 showToastApp('Student information updated');
