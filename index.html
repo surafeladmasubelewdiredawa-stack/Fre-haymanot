@@ -963,79 +963,84 @@
         document.addEventListener('input', (event) => { const el = event.target; if (el && el.matches('#inp-church, #inp-christ, #inp-first, #inp-last, #inp-age, #inp-sex, #inp-phone, #inp-emer-name, #inp-emer-phone, #inp-class')) { el.placeholder = ''; el.classList.remove('validation-placeholder'); if (!el.matches('#inp-first, #inp-last')) el.style.borderColor = ''; if (el.matches('#inp-first, #inp-last')) validateStudentName(); } });
 
         function finishRegistration() {
+            // Keep validation errors inline; never let a duplicate record enter the list.
+            if (!validateRegistrationFields()) return;
+            if (!validateStudentName()) {
+                const first = document.getElementById('inp-first');
+                if (first) first.focus();
+                return;
+            }
+
+            const valueOf = id => (document.getElementById(id)?.value || '').trim();
+            const cClass = valueOf('inp-class');
+            const values = {
+                churchName: valueOf('inp-church'),
+                christName: valueOf('inp-christ'),
+                firstName: valueOf('inp-first'),
+                lastName: valueOf('inp-last'),
+                age: valueOf('inp-age'),
+                sex: valueOf('inp-sex'),
+                phone: valueOf('inp-phone'),
+                emerName: valueOf('inp-emer-name'),
+                emerPhone: valueOf('inp-emer-phone'),
+                className: cClass,
+                pic: base64Image
+            };
+
+            let savedId;
+            if (editingStudentId) {
+                savedId = editingStudentId;
+                const index = students.findIndex(st => String(st.id) === String(savedId));
+                if (index < 0) {
+                    showToastApp('Student record not found. Please reopen Edit ID.');
+                    return;
+                }
+                // Update only after duplicate validation has passed.
+                students[index] = { ...students[index], ...values };
+            } else {
+                // Recheck exact full-name pair immediately before insertion.
+                const norm = v => String(v || '').toLocaleLowerCase().replace(/\s+/g, ' ').trim();
+                const duplicate = students.some(st => norm(st.firstName) === norm(values.firstName) && norm(st.lastName) === norm(values.lastName));
+                if (duplicate) {
+                    validateStudentName();
+                    document.getElementById('inp-first')?.focus();
+                    return;
+                }
+                savedId = 'STU-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(Math.random() * 1000);
+                let startMark = 1;
+                try { startMark = nextIncompleteMarkOfClass(getCleanClassNumber(cClass)) || 1; } catch (e) { console.warn('Could not calculate starting mark:', e); }
+                students.push({ id: savedId, ...values, startMark });
+            }
+
+            // Persist synchronously to local storage first; cloud sync is queued separately.
+            try { persistStudents(); }
+            catch (saveError) {
+                console.error('Local student save error:', saveError);
+                showToastApp('Could not save student locally. Please check device storage.');
+                return;
+            }
+
+            // The record is saved. Navigation/rendering errors must not be reported as save failures.
+            editingStudentId = null;
+            base64Image = null;
             try {
-                if (!validateRegistrationFields()) return;
-                // Re-check duplicates at the moment of saving. Only the exact pair is blocked.
-                if (!validateStudentName()) {
-                    document.getElementById('inp-first').focus();
-                    return;
-                }
-                const cClass = document.getElementById('inp-class').value.trim();
-                const values = {
-                    churchName: document.getElementById('inp-church').value.trim(),
-                    christName: document.getElementById('inp-christ').value.trim(),
-                    firstName: document.getElementById('inp-first').value.trim(),
-                    lastName: document.getElementById('inp-last').value.trim(),
-                    age: document.getElementById('inp-age').value.trim(),
-                    sex: document.getElementById('inp-sex').value,
-                    phone: document.getElementById('inp-phone').value.trim(),
-                    emerName: document.getElementById('inp-emer-name').value.trim(),
-                    emerPhone: document.getElementById('inp-emer-phone').value.trim(),
-                    className: cClass,
-                    pic: base64Image
-                };
-
-                if (editingStudentId) {
-                    const savedId = editingStudentId;
-                    const index = students.findIndex(st => st.id === savedId);
-                    if (index < 0) {
-                        showToastApp('Student record was not found. Please reopen Edit ID.');
-                        return;
-                    }
-                    students[index] = { ...students[index], ...values };
-                    persistStudents();
-                    editingStudentId = null;
-                    document.querySelector('#view-new-root h2').innerText = 'Register';
-                    const cancelBtn = document.getElementById('edit-cancel-btn');
-                    if (cancelBtn) cancelBtn.classList.add('hidden');
-                    const finishBtn = document.querySelector('#form-step-2 button[onclick="finishRegistration()"]');
-                    if (finishBtn) finishBtn.innerText = 'Finish';
-                    base64Image = null;
-                    showToastApp('Student information updated');
-                    openStudentDetail(savedId);
-                    return;
-                }
-
-                const randomId = 'STU-' + Math.floor(1000 + Math.random() * 9000);
-                const student = { id: randomId, ...values, startMark: nextIncompleteMarkOfClass(getCleanClassNumber(cClass)) };
-                students.push(student);
-                persistStudents();
-
-                // Reset the registration form, then open the newly created student's ID page.
-                base64Image = null;
+                document.querySelector('#view-new-root h2').innerText = 'Register';
+                const cancelBtn = document.getElementById('edit-cancel-btn');
+                if (cancelBtn) cancelBtn.classList.add('hidden');
+                const finishBtn = document.querySelector('#form-step-2 button[onclick="finishRegistration()"]');
+                if (finishBtn) finishBtn.innerText = 'Finish';
                 clearStudentNameErrors();
                 const previewBox = document.getElementById('img-preview-box');
                 if (previewBox) { previewBox.classList.add('hidden'); previewBox.classList.remove('flex'); }
                 const preview = document.getElementById('img-preview');
                 if (preview) preview.src = '';
-                ['inp-church', 'inp-christ', 'inp-first', 'inp-last', 'inp-age', 'inp-phone', 'inp-emer-name', 'inp-emer-phone', 'inp-class', 'inp-sex'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) {
-                        el.value = id === 'inp-church' ? 'Fre Haymanot' : '';
-                        el.placeholder = '';
-                        el.classList.remove('validation-placeholder');
-                        el.style.borderColor = '';
-                    }
-                });
-                const classPicker = document.getElementById('class-picker');
-                if (classPicker) classPicker.classList.add('hidden');
-                const sexPicker = document.getElementById('sex-picker');
-                if (sexPicker) sexPicker.classList.add('hidden');
-                goToStep(1);
-                openStudentDetail(student.id);
-            } catch (error) {
-                console.error('Finish registration failed:', error);
-                showToastApp('Could not save student: ' + (error && error.message ? error.message : 'Please try again.'));
+                if (!values.firstName) return;
+                showToastApp('Student saved successfully');
+                openStudentDetail(savedId);
+            } catch (displayError) {
+                console.error('Student saved, but ID page display failed:', displayError);
+                showToastApp('Student saved. Please open the student from the list.');
+                try { showView('home-root'); } catch (_) {}
             }
         }
         function getCleanClassNumber(str) { if(!str) return ""; return str.toLowerCase().replace(/[^0-9]/g, ''); }
