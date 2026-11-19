@@ -788,14 +788,11 @@
             const last = String(lastEl.value || '').trim();
             if (!first || !last) return true; // Required-field validation handles blanks.
             const norm = value => value.toLocaleLowerCase().replace(/\s+/g, ' ').trim();
-            let message = '';
-            if (norm(first) === norm(last)) {
-                message = 'First name and Last name cannot be the same.';
-            } else {
-                const duplicate = students.some(st => st.id !== editingStudentId &&
-                    norm(st.firstName || '') === norm(first) && norm(st.lastName || '') === norm(last));
-                if (duplicate) message = 'This student is already registered.';
-            }
+            // Only block an exact existing First Name + Last Name pair.
+            // Matching just one name (or First Name === Last Name) is allowed.
+            const duplicate = students.some(st => st.id !== editingStudentId &&
+                norm(st.firstName || '') === norm(first) && norm(st.lastName || '') === norm(last));
+            const message = duplicate ? 'This student is already registered.' : '';
             if (message) {
                 [['first-name-error', firstEl], ['last-name-error', lastEl]].forEach(([id, input]) => {
                     const error = document.getElementById(id);
