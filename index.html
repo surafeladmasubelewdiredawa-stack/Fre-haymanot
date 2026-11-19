@@ -251,7 +251,9 @@
                 <div class="flex items-center justify-between mb-2"><span class="text-sm font-semibold text-gray-400">Step 2 of 2</span></div>
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="block text-sm font-medium text-gray-300 mb-1">Age</label><input type="number" id="inp-age" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
-                    <div><label class="block text-sm font-medium text-gray-300 mb-1">Sex</label><select id="inp-sex" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"><option value="Male">Male</option><option value="Female">Female</option></select></div>
+                    <div><label class="block text-sm font-medium text-gray-300 mb-1">Sex</label>
+                        <div class="relative"><input type="text" id="inp-sex" readonly autocomplete="off" placeholder="" onclick="toggleSexPicker(event)" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100 cursor-pointer">
+                        <div id="sex-picker" class="hidden absolute z-50 left-0 right-0 top-full mt-2 p-2 rounded-xl border border-gray-600 bg-gray-900 shadow-2xl grid grid-cols-2 gap-2"><button type="button" onclick="chooseSex('Male',event)" class="class-choice">Male</button><button type="button" onclick="chooseSex('Female',event)" class="class-choice">Female</button></div></div></div>
                 </div>
                 <div class="mt-2"><label class="block text-sm font-medium text-gray-300 mb-1">Phone Number</label><input type="tel" id="inp-phone" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
                 <div class="grid grid-cols-2 gap-4 mt-2">
@@ -678,9 +680,13 @@
                   <button id="download-id-btn" onclick="downloadIDCards()" class="flex-1 min-w-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-4 rounded-xl active:scale-[0.98] shadow-lg transition-all flex items-center justify-center gap-2">
                     <i class="fa-solid fa-download"></i> Download ID Cards
                   </button>
-                  <button id="delete-student-btn" onclick="deleteCurrentStudent()" aria-label="Delete student" title="Delete student" class="shrink-0 px-5 bg-red-700 hover:bg-red-600 text-white font-semibold rounded-xl active:scale-[0.98] shadow-lg transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-trash"></i><span>Delete</span>
+                  <button id="more-student-btn" onclick="toggleStudentActions()" aria-label="More student actions" title="More" class="shrink-0 px-5 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-xl active:scale-[0.98] shadow-lg transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-ellipsis"></i><span>More</span>
                   </button>
+                </div>
+                <div id="student-more-actions" class="hidden w-full flex-col gap-2 mt-3">
+                  <button onclick="editCurrentStudent()" class="w-full bg-indigo-700 hover:bg-indigo-600 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2"><i class="fa-solid fa-pen-to-square"></i> Edit ID</button>
+                  <button onclick="deleteCurrentStudent()" class="w-full bg-red-700 hover:bg-red-600 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2"><i class="fa-solid fa-trash"></i> Delete</button>
                 </div>
             `;
 
@@ -794,6 +800,58 @@
             document.getElementById('form-step-2').classList.remove('hidden');
         }
         function handleImageSelect(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { base64Image = e.target.result; document.getElementById('img-preview').src = base64Image; document.getElementById('img-preview-box').classList.remove('hidden'); document.getElementById('img-preview-box').classList.add('flex'); }; reader.readAsDataURL(file); }
+        let editingStudentId = null;
+        function toggleSexPicker(e) {
+            if (e) e.stopPropagation();
+            const picker = document.getElementById('sex-picker');
+            if (picker) picker.classList.toggle('hidden');
+        }
+        function chooseSex(value, e) {
+            if (e) e.stopPropagation();
+            const field = document.getElementById('inp-sex');
+            if (field) { field.value = value; field.placeholder = ''; field.classList.remove('validation-placeholder'); field.style.borderColor = ''; }
+            const picker = document.getElementById('sex-picker');
+            if (picker) picker.classList.add('hidden');
+        }
+        function toggleStudentActions() {
+            const actions = document.getElementById('student-more-actions');
+            if (actions) {
+                const opening = actions.classList.contains('hidden');
+                actions.classList.toggle('hidden');
+                actions.classList.toggle('flex', opening);
+            }
+        }
+        function editCurrentStudent() {
+            const student = students.find(st => st.id === currentStudentId);
+            if (!student) return;
+            editingStudentId = student.id;
+            document.getElementById('inp-church').value = student.churchName || 'Fre Haymanot';
+            document.getElementById('inp-christ').value = student.christName || '';
+            document.getElementById('inp-first').value = student.firstName || '';
+            document.getElementById('inp-last').value = student.lastName || '';
+            document.getElementById('inp-age').value = student.age || '';
+            document.getElementById('inp-sex').value = student.sex || '';
+            document.getElementById('inp-phone').value = student.phone || '';
+            document.getElementById('inp-emer-name').value = student.emerName || '';
+            document.getElementById('inp-emer-phone').value = student.emerPhone || '';
+            document.getElementById('inp-class').value = student.className || '';
+            base64Image = student.pic || null;
+            const previewBox = document.getElementById('img-preview-box');
+            if (student.pic) {
+                document.getElementById('img-preview').src = student.pic;
+                previewBox.classList.remove('hidden'); previewBox.classList.add('flex');
+            } else {
+                document.getElementById('img-preview').src = '';
+                previewBox.classList.add('hidden'); previewBox.classList.remove('flex');
+            }
+            document.querySelector('#view-new-root h2').innerText = 'Edit Student';
+            const finishBtn = document.querySelector('#form-step-2 button[onclick="finishRegistration()"]');
+            if (finishBtn) finishBtn.innerText = 'Save Changes';
+            document.getElementById('form-step-1').classList.remove('hidden');
+            document.getElementById('form-step-2').classList.add('hidden');
+            showView('new-root');
+        }
+
         function toggleClassPicker(e) {
             if (e) e.stopPropagation();
             const picker = document.getElementById('class-picker');
@@ -814,7 +872,7 @@
             const fields = [
                 ['inp-church','Church Name'], ['inp-christ','Christ Name'],
                 ['inp-first','First Name'], ['inp-last','Last Name'],
-                ['inp-age','Age'], ['inp-phone','Phone'],
+                ['inp-age','Age'], ['inp-sex','Sex'], ['inp-phone','Phone'],
                 ['inp-emer-name','Emergency Name'], ['inp-emer-phone','Emergency Phone'],
                 ['inp-class','Class']
             ];
@@ -845,9 +903,58 @@
         }
 
 
-        document.addEventListener('input', (event) => { const el = event.target; if (el && el.matches('#inp-church, #inp-christ, #inp-first, #inp-last, #inp-age, #inp-phone, #inp-emer-name, #inp-emer-phone, #inp-class')) { el.placeholder = ''; el.classList.remove('validation-placeholder'); el.style.borderColor = ''; } });
+        document.addEventListener('input', (event) => { const el = event.target; if (el && el.matches('#inp-church, #inp-christ, #inp-first, #inp-last, #inp-age, #inp-sex, #inp-phone, #inp-emer-name, #inp-emer-phone, #inp-class')) { el.placeholder = ''; el.classList.remove('validation-placeholder'); el.style.borderColor = ''; } });
 
-        function finishRegistration() { if (!validateRegistrationFields()) return; const cClass = document.getElementById('inp-class').value.trim(); const randomId = 'STU-' + Math.floor(1000 + Math.random() * 9000); const student = { id: randomId, churchName: document.getElementById('inp-church').value.trim(), christName: document.getElementById('inp-christ').value.trim(), firstName: document.getElementById('inp-first').value.trim(), lastName: document.getElementById('inp-last').value.trim(), age: document.getElementById('inp-age').value.trim(), sex: document.getElementById('inp-sex').value, phone: document.getElementById('inp-phone').value.trim(), emerName: document.getElementById('inp-emer-name').value.trim(), emerPhone: document.getElementById('inp-emer-phone').value.trim(), className: cClass, pic: base64Image, startMark: maxMarkOfClass(getCleanClassNumber(cClass)) + 1 }; students.push(student); persistStudents(); showModal('Registration Successful', `Student ${student.firstName} has been saved successfully with ID: ${student.id}`); base64Image = null; document.getElementById('img-preview-box').classList.add('hidden'); document.getElementById('img-preview-box').classList.remove('flex'); document.getElementById('img-preview').src = ''; ['inp-church', 'inp-christ', 'inp-first', 'inp-last', 'inp-age', 'inp-phone', 'inp-emer-name', 'inp-emer-phone', 'inp-class'].forEach(id => { const el = document.getElementById(id); if (el) { el.value = id === 'inp-church' ? 'Fre Haymanot' : ''; el.placeholder = ''; el.classList.remove('validation-placeholder'); el.style.borderColor = ''; } }); const classPicker = document.getElementById('class-picker'); if (classPicker) classPicker.classList.add('hidden'); const sexEl = document.getElementById('inp-sex'); if (sexEl) sexEl.value = 'Male'; goToStep(1); switchNavTab('class'); }
+        function finishRegistration() {
+            if (!validateRegistrationFields()) return;
+            const cClass = document.getElementById('inp-class').value.trim();
+            const values = {
+                churchName: document.getElementById('inp-church').value.trim(),
+                christName: document.getElementById('inp-christ').value.trim(),
+                firstName: document.getElementById('inp-first').value.trim(),
+                lastName: document.getElementById('inp-last').value.trim(),
+                age: document.getElementById('inp-age').value.trim(),
+                sex: document.getElementById('inp-sex').value,
+                phone: document.getElementById('inp-phone').value.trim(),
+                emerName: document.getElementById('inp-emer-name').value.trim(),
+                emerPhone: document.getElementById('inp-emer-phone').value.trim(),
+                className: cClass,
+                pic: base64Image
+            };
+            if (editingStudentId) {
+                const index = students.findIndex(st => st.id === editingStudentId);
+                if (index < 0) return;
+                students[index] = { ...students[index], ...values };
+                const savedId = editingStudentId;
+                editingStudentId = null;
+                persistStudents();
+                document.querySelector('#view-new-root h2').innerText = 'Register';
+                const finishBtn = document.querySelector('#form-step-2 button[onclick="finishRegistration()"]');
+                if (finishBtn) finishBtn.innerText = 'Finish';
+                showToastApp('Student information updated');
+                base64Image = null;
+                openStudentDetail(savedId);
+                return;
+            }
+            const randomId = 'STU-' + Math.floor(1000 + Math.random() * 9000);
+            const student = { id: randomId, ...values, startMark: maxMarkOfClass(getCleanClassNumber(cClass)) + 1 };
+            students.push(student);
+            persistStudents();
+            showModal('Registration Successful', `Student ${student.firstName} has been saved successfully with ID: ${student.id}`);
+            base64Image = null;
+            document.getElementById('img-preview-box').classList.add('hidden');
+            document.getElementById('img-preview-box').classList.remove('flex');
+            document.getElementById('img-preview').src = '';
+            ['inp-church', 'inp-christ', 'inp-first', 'inp-last', 'inp-age', 'inp-phone', 'inp-emer-name', 'inp-emer-phone', 'inp-class', 'inp-sex'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.value = id === 'inp-church' ? 'Fre Haymanot' : ''; el.placeholder = ''; el.classList.remove('validation-placeholder'); el.style.borderColor = ''; }
+            });
+            const classPicker = document.getElementById('class-picker');
+            if (classPicker) classPicker.classList.add('hidden');
+            const sexPicker = document.getElementById('sex-picker');
+            if (sexPicker) sexPicker.classList.add('hidden');
+            goToStep(1); switchNavTab('class');
+        }
         function getCleanClassNumber(str) { if(!str) return ""; return str.toLowerCase().replace(/[^0-9]/g, ''); }
 
         let videoStream = null, camInterval = null;
