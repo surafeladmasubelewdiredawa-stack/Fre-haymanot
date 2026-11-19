@@ -436,9 +436,9 @@
         const ID_LAYOUT = {
             churchName: { fontSize: "13px", fontWeight: "800", color: "#1e3a8a", marginTop: "10px", marginBottom: "4px", marginLeft: "0px", marginRight: "0px" },
             classNameText: { fontSize: "14px", fontWeight: "700", color: "#4f46e5", marginTop: "10px", marginBottom: "10px", marginLeft: "0px", marginRight: "20px" },
-            detailsText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelWidth: "80px", marginTop: "0px", marginBottom: "0px", marginLeft: "30px", marginRight: "0px" },
-            profilePic: { width: "96px", height: "96px", borderRadius: "50%", border: "3px #EdB200", ringGap: "4px", marginTop: "80px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
-            logoAboveName: { size: 28, dx: 0, dy: 0, left: 0, right: 0, up: 40, down: 0 },
+            detailsText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelWidth: "80px", marginTop: "0px", marginBottom: "0px", marginLeft: "-30px", marginRight: "0px" },
+            profilePic: { width: "96px", height: "96px", borderRadius: "50%", border: "3px #EdB200", ringGap: "4px", marginTop: "10px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
+            logoAboveName: { size: 28, dx: 0, dy: 0, left: 0, right: 0, up: 0, down: 0 },
             qrLogo: { size: 40, dx: 0, dy: 0 },
             qrCode: { width: 180, height: 180, bgColor: "transparent", borderRadius: "0px", padding: "0px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px", dotsColor: "#000000", dotsType: "rounded", cornersSquareColor: "#000000", cornersSquareType: "extra-rounded", cornersDotColor: "#000000", cornersDotType: "dot" },
             emergencyText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelFontSize: "10px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" }
@@ -453,9 +453,9 @@
         const ID_LAYOUT_preview = {
             churchName: { fontSize: "13px", fontWeight: "800", color: "#1e3a8a", marginTop: "10px", marginBottom: "4px", marginLeft: "0px", marginRight: "0px" },
             classNameText: { fontSize: "14px", fontWeight: "700", color: "#4f46e5", marginTop: "10px", marginBottom: "10px", marginLeft: "0px", marginRight: "20px" },
-            detailsText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelWidth: "80px", marginTop: "40px", marginBottom: "0px", marginLeft: "30px", marginRight: "0px" },
-            profilePic: { width: "96px", height: "96px", borderRadius: "50%", border: "3px #EdB200", ringGap: "4px", marginTop: "80px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
-            logoAboveName: { size: 28, dx: 0, dy: 0, left: 0, right: 0, up: 40, down: 0 },
+            detailsText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelWidth: "80px", marginTop: "0px", marginBottom: "0px", marginLeft: "-30px", marginRight: "0px" },
+            profilePic: { width: "96px", height: "96px", borderRadius: "50%", border: "3px #EdB200", ringGap: "4px", marginTop: "10px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
+            logoAboveName: { size: 28, dx: 0, dy: 0, left: 0, right: 0, up: 0, down: 0 },
             qrLogo: { size: 40, dx: 0, dy: 0 },
             qrCode: { width: 180, height: 180, bgColor: "transparent", borderRadius: "0px", padding: "0px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px", dotsColor: "#000000", dotsType: "rounded", cornersSquareColor: "#000000", cornersSquareType: "extra-rounded", cornersDotColor: "#000000", cornersDotType: "dot" },
             emergencyText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelFontSize: "10px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" }
@@ -559,15 +559,15 @@
             const row = (lab, val) => `<div style="display: flex; margin-bottom: ${Math.round(4 * K)}px;"><span style="width: ${D.labelWidth}; color: ${D.labelColor};">${lab}</span> <span>${val}</span></div>`;
             // 3.png mini logo above Full Name (position via dx/dy, hidden if 3.png missing)
             const LP = getLogoPos('front', L);
-            const logo = `<img src="3.png" alt="" style="display:block;width:${Math.round(LP.size * K)}px;height:auto;max-width:none;margin-bottom:${Math.round(3 * K)}px;transform:translate(${(LP.dx * K).toFixed(1)}px,${(LP.dy * K).toFixed(1)}px);" onerror="this.remove()">`;
+            const logo = `<img src="3.png" alt="" style="display:block;flex-shrink:0;width:${Math.round(LP.size * K)}px;height:auto;max-width:none;transform:translate(${(LP.dx * K).toFixed(1)}px,${(LP.dy * K).toFixed(1)}px);" onerror="this.remove()">`;
             return `
                 <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:${Math.round(16 * K)}px;">
-                    <div style="text-align:center;padding-left:${Math.round(16 * K)}px;padding-right:${Math.round(16 * K)}px;">
-                        <h4 style="font-size: ${C.fontSize}; font-weight: ${C.fontWeight}; color: ${C.color}; margin-top: ${C.marginTop}; margin-bottom: ${C.marginBottom}; margin-left: ${C.marginLeft}; margin-right: ${C.marginRight}; letter-spacing: 0.05em; line-height: 1.2;">Mekane semaet K/Estifanos Betekrstiyan fre Haymanot S/T/Bet</h4>
+                    <div style="display:flex;align-items:center;justify-content:center;gap:${Math.round(8 * K)}px;padding-left:${Math.round(8 * K)}px;padding-right:${Math.round(8 * K)}px;">
+                        ${logo}
+                        <h4 style="font-size: ${C.fontSize}; font-weight: ${C.fontWeight}; color: ${C.color}; margin-top: ${C.marginTop}; margin-bottom: ${C.marginBottom}; margin-left: ${C.marginLeft}; margin-right: ${C.marginRight}; letter-spacing: 0.05em; line-height: 1.2;text-align:center;">Mekane semaet K/Estifanos Betekrstiyan fre Haymanot S/T/Bet</h4>
                     </div>
-                    <div style="flex:1;display:flex;align-items:center;justify-content:space-between;gap:${Math.round(16 * K)}px;margin-top:${Math.round(-12 * K)}px;padding:${Math.round(8 * K)}px;">
+                    <div style="flex:1;display:flex;align-items:center;justify-content:space-between;gap:${Math.round(16 * K)}px;margin-top:${Math.round(-52 * K)}px;padding:${Math.round(8 * K)}px;">
                         <div style="font-size: ${D.fontSize}; font-weight: ${D.fontWeight}; color: ${D.color}; margin-top: ${D.marginTop}; margin-bottom: ${D.marginBottom}; margin-left: ${D.marginLeft}; margin-right: ${D.marginRight}; padding: ${Math.round(8 * K)}px; flex: 1; line-height: 1.5;">
-                            ${logo}
                             ${row('Full Name :', `${student.firstName} ${student.lastName}`)}
                             ${row('Age :', student.age || 'N/A')}
                             ${row('Phone :', student.phone || 'N/A')}
@@ -1272,7 +1272,12 @@
                 ctx.fillStyle = L.churchName.color;
                 let y = PAD + parseInt(L.churchName.marginTop) * S;
                 const lhC = 13 * S * 1.2;
-                wrapTextLines(ctx, ID_CHURCH_TITLE, W - PAD * 2).forEach(ln => { ctx.fillText(ln, W / 2, y); y += lhC; });
+                const headerLogoW = ID_LOGO_IMG ? 28 * S : 0;
+                if (ID_LOGO_IMG) {
+                    const im = ID_LOGO_IMG, rr = Math.min(headerLogoW / im.naturalWidth, headerLogoW / im.naturalHeight);
+                    ctx.drawImage(im, PAD - 8 * S, y - 2 * S, im.naturalWidth * rr, im.naturalHeight * rr);
+                }
+                wrapTextLines(ctx, ID_CHURCH_TITLE, W - PAD * 2 - headerLogoW).forEach(ln => { ctx.fillText(ln, W / 2 + (headerLogoW ? 8 * S : 0), y); y += lhC; });
                 ctx.letterSpacing = '0px';
                 const headerBottom = y + parseInt(L.churchName.marginBottom) * S;
 
@@ -1291,7 +1296,7 @@
                 // 3.png mini logo above Full Name (top of the left details column)
                 const LPF = getLogoPos('front', L);
                 const logoBoxS = LPF.size * S;
-                const logoH = ID_LOGO_IMG ? logoBoxS + 6 * S : 0;
+                const logoH = 0;
                 const colH = detailsH + logoH;
                 const ringGap = (parseFloat(L.profilePic.ringGap) || 4) * S;
                 const ringW = (parseFloat(L.profilePic.border) || 3) * S;
@@ -1299,7 +1304,7 @@
                 const wrapS = photoS + 2 * (ringGap + ringW);
                 const blockH = Math.max(wrapS, colH);
                 const zoneTop = headerBottom + 8, zoneBottom = H - PAD;
-                const blockY = zoneTop + Math.max((zoneBottom - zoneTop - blockH) / 2, 0) - 20 * S;
+                const blockY = zoneTop + Math.max((zoneBottom - zoneTop - blockH) / 2, 0) - 60 * S;
 
                 const picImg = await loadImgSafe(student.pic);
                 const wrapX = W - PAD - wrapS, wrapY = blockY + (blockH - wrapS) / 2;
@@ -1321,13 +1326,9 @@
                 if (ringStyle !== 'solid') { ctx.setLineDash([0.1, ringW * 3]); ctx.lineCap = 'round'; }
                 ctx.stroke(); ctx.setLineDash([]); ctx.lineCap = 'butt';
 
-                const detX = PAD, labW = parseInt(L.detailsText.labelWidth) * S;
+                const detX = PAD - 30 * S, labW = parseInt(L.detailsText.labelWidth) * S;
                 const valX = detX + labW, valMaxW = wrapX - 24 - valX;
                 const colTop = blockY + (blockH - colH) / 2;
-                if (ID_LOGO_IMG) {
-                    const lim = ID_LOGO_IMG, r = Math.min(logoBoxS / lim.naturalWidth, logoBoxS / lim.naturalHeight);
-                    ctx.drawImage(lim, detX + LPF.dx * S + (logoBoxS - lim.naturalWidth * r) / 2, colTop + LPF.dy * S + (logoBoxS - lim.naturalHeight * r) / 2, lim.naturalWidth * r, lim.naturalHeight * r);
-                }
                 let ry = colTop + logoH;
                 rows.forEach(r => {
                     ctx.textAlign = 'left'; ctx.font = `600 ${11 * S}px Inter, sans-serif`;
