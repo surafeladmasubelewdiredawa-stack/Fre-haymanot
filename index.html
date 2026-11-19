@@ -110,6 +110,9 @@
         .att-table tr:hover{background:rgba(255,255,255,0.05)}
         .att-table td:nth-child(2):hover{background-color:rgba(255,255,255,0.05)!important}
 
+        .class-choice{min-height:38px;border:1px solid #4b5563;border-radius:9px;background:#1f2937;color:#f9fafb;font-size:13px;font-weight:700;cursor:pointer}
+        .class-choice:active,.class-choice:focus{background:#4f46e5;border-color:#818cf8;outline:none}
+
         /* Camera Scanner Style */
         #camera-modal{position:fixed;inset:0;background:#000;z-index:70;display:none;flex-direction:column}
         #camera-modal.active{display:flex}
@@ -234,24 +237,24 @@
             <h2 class="text-lg font-bold mb-3 text-white tracking-tight">Register</h2>
             <div id="form-step-1" class="space-y-4 fade-in">
                 <div class="flex items-center justify-between mb-2"><span class="text-sm font-semibold text-gray-400">Step 1 of 2</span></div>
-                <div><label class="block text-sm font-medium text-gray-300 mb-1">Church Name</label><input type="text" id="inp-church" placeholder="Enter church name" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
-                <div><label class="block text-sm font-medium text-gray-300 mb-1">Christ Name</label><input type="text" id="inp-christ" placeholder="Enter christ name" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
+                <div><label class="block text-sm font-medium text-gray-300 mb-1">Church Name</label><input type="text" id="inp-church" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
+                <div><label class="block text-sm font-medium text-gray-300 mb-1">Christ Name</label><input type="text" id="inp-christ" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="block text-sm font-medium text-gray-300 mb-1">First Name</label><input type="text" id="inp-first" placeholder="First name" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
-                    <div><label class="block text-sm font-medium text-gray-300 mb-1">Last Name</label><input type="text" id="inp-last" placeholder="Last name" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
+                    <div><label class="block text-sm font-medium text-gray-300 mb-1">First Name</label><input type="text" id="inp-first" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
+                    <div><label class="block text-sm font-medium text-gray-300 mb-1">Last Name</label><input type="text" id="inp-last" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
                 </div>
                 <button onclick="goToStep(2)" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-4 rounded-xl mt-6 active:scale-[0.98] shadow-lg shadow-indigo-500/30 transition-all">Next</button>
             </div>
             <div id="form-step-2" class="space-y-4 hidden fade-in">
                 <div class="flex items-center justify-between mb-2"><span class="text-sm font-semibold text-gray-400">Step 2 of 2</span></div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="block text-sm font-medium text-gray-300 mb-1">Age</label><input type="number" id="inp-age" placeholder="Age" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
+                    <div><label class="block text-sm font-medium text-gray-300 mb-1">Age</label><input type="number" id="inp-age" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
                     <div><label class="block text-sm font-medium text-gray-300 mb-1">Sex</label><select id="inp-sex" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"><option value="Male">Male</option><option value="Female">Female</option></select></div>
                 </div>
-                <div class="mt-2"><label class="block text-sm font-medium text-gray-300 mb-1">Phone Number</label><input type="tel" id="inp-phone" placeholder="e.g. +251 911 234 567" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
+                <div class="mt-2"><label class="block text-sm font-medium text-gray-300 mb-1">Phone Number</label><input type="tel" id="inp-phone" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
                 <div class="grid grid-cols-2 gap-4 mt-2">
-                    <div><label class="block text-sm font-medium text-gray-300 mb-1">Emergency Name</label><input type="text" id="inp-emer-name" placeholder="Emergency contact name" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
-                    <div><label class="block text-sm font-medium text-gray-300 mb-1">Emer. Phone</label><input type="tel" id="inp-emer-phone" placeholder="e.g. +251 922 987 654" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
+                    <div><label class="block text-sm font-medium text-gray-300 mb-1">Emergency Name</label><input type="text" id="inp-emer-name" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
+                    <div><label class="block text-sm font-medium text-gray-300 mb-1">Emer. Phone</label><input type="tel" id="inp-emer-phone" placeholder="" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
                 </div>
                 <div class="mt-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">Profile Picture</label>
@@ -263,7 +266,9 @@
                     <input type="file" id="inp-camera" accept="image/*" capture="environment" class="hidden" onchange="handleImageSelect(event)">
                     <div id="img-preview-box" class="mt-3 hidden justify-center w-full h-32 bg-gray-900/50 rounded-xl overflow-hidden border border-gray-700 shadow-sm"><img id="img-preview" src="" class="h-full object-cover"></div>
                 </div>
-                <div class="mt-4"><label class="block text-sm font-medium text-gray-300 mb-1">Assign Class</label><input type="text" id="inp-class" placeholder="e.g. Class 1" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100"></div>
+                <div class="mt-4"><label class="block text-sm font-medium text-gray-300 mb-1">Class</label>
+                    <div class="relative"><input type="text" id="inp-class" readonly autocomplete="off" placeholder="" onclick="toggleClassPicker(event)" class="w-full bg-gray-800/70 backdrop-blur-sm border border-gray-700 shadow-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-100 cursor-pointer">
+                    <div id="class-picker" class="hidden absolute z-50 left-0 right-0 top-full mt-2 p-2 rounded-xl border border-gray-600 bg-gray-900 shadow-2xl grid grid-cols-4 gap-2"><button type="button" onclick="chooseClass(1,event)" class="class-choice">1</button><button type="button" onclick="chooseClass(2,event)" class="class-choice">2</button><button type="button" onclick="chooseClass(3,event)" class="class-choice">3</button><button type="button" onclick="chooseClass(4,event)" class="class-choice">4</button><button type="button" onclick="chooseClass(5,event)" class="class-choice">5</button><button type="button" onclick="chooseClass(6,event)" class="class-choice">6</button><button type="button" onclick="chooseClass(7,event)" class="class-choice">7</button><button type="button" onclick="chooseClass(8,event)" class="class-choice">8</button></div></div></div>
                 <div class="flex gap-3 mt-6">
                     <button onclick="goToStep(1)" class="w-1/3 bg-gray-700/60 backdrop-blur-sm text-white font-semibold py-4 rounded-xl border border-gray-600 shadow-sm active:bg-gray-600 transition-all">Back</button>
                     <button onclick="finishRegistration()" class="w-2/3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-4 rounded-xl active:scale-[0.98] shadow-lg shadow-indigo-500/30 transition-all">Finish</button>
@@ -388,16 +393,30 @@
 
     <script>
         // ============================================================
-        
+        //   3.png LOGO POSITION CONTROL — THE CONTROL IS HERE (code ውስጥ, ከላይ ፊትለፊት)
+        //   3.png is placed in TWO spots: above Full Name (front card, mini size)
+        //   and in the CENTER of the QR code (with a transparent quiet gap around it).
+        //     dx : RIGHT = + number   |   LEFT = − number
+        //     dy : DOWN  = + number   |   UP   = − number
+        //     size : logo size in px
+        //   Example: front: { size: 28, dx: -6, dy: 10 }  →  logo 6px LEFT, 10px DOWN.
+        //   Edit the numbers below and save the file — that is the whole control.
+        // ============================================================
         const ID_LOGO_DEFAULTS = {
-            front: { size: 28, dx: 0, dy: 0 },   // above Full Name
-            qr:    { size: 40, dx: 0, dy: 0 }    // inside QR center
+            front: { size: 28, dx: 0, dy: 0, left: 0, right: 0, up: 0, down: 0 }, // above Full Name
+            qr:    { size: 40, dx: 0, dy: 0 } // inside QR center
         };
         // Logo position/size is controlled independently inside ID_LAYOUT (download) and ID_LAYOUT_preview (page/preview).
         function getLogoPos(mode, layout) {
             const fallback = ID_LOGO_DEFAULTS[mode] || ID_LOGO_DEFAULTS.front;
             const configured = layout && (mode === 'front' ? layout.logoAboveName : layout.qrLogo);
-            return Object.assign({}, fallback, configured || {});
+            const pos = Object.assign({}, fallback, configured || {});
+            // Directional controls are measured in px: right/down move positive; left/up move negative.
+            if (configured && ['left','right','up','down'].some(k => configured[k] !== undefined)) {
+                pos.dx = (Number(configured.right) || 0) - (Number(configured.left) || 0);
+                pos.dy = (Number(configured.down) || 0) - (Number(configured.up) || 0);
+            }
+            return pos;
         }
         try { localStorage.removeItem('idLogoPos'); } catch (e) {} // clear any old saved arrow-nudges
         let ID_LOGO_IMG = null;
@@ -414,19 +433,25 @@
             churchName: { fontSize: "13px", fontWeight: "800", color: "#1e3a8a", marginTop: "10px", marginBottom: "4px", marginLeft: "0px", marginRight: "0px" },
             classNameText: { fontSize: "14px", fontWeight: "700", color: "#4f46e5", marginTop: "10px", marginBottom: "10px", marginLeft: "0px", marginRight: "20px" },
             detailsText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelWidth: "80px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
-            profilePic: { width: "96px", height: "96px", borderRadius: "50%", border: "3px #EdB200", ringGap: "4px", marginTop: "-150px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
-            logoAboveName: { size: 28, dx: 0, dy: 0 },
+            profilePic: { width: "96px", height: "96px", borderRadius: "50%", border: "3px #EdB200", ringGap: "4px", marginTop: "50px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
+            logoAboveName: { size: 28, dx: 0, dy: 0, left: 0, right: 0, up: 50, down: 0 },
             qrLogo: { size: 40, dx: 0, dy: 0 },
             qrCode: { width: 180, height: 180, bgColor: "transparent", borderRadius: "0px", padding: "0px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px", dotsColor: "#000000", dotsType: "rounded", cornersSquareColor: "#000000", cornersSquareType: "extra-rounded", cornersDotColor: "#000000", cornersDotType: "dot" },
             emergencyText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelFontSize: "10px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" }
         };
 
+        // Independent layout controls for downloaded PNG files.
+        // Edit this object without changing the on-screen ID / preview.
+
+
+        // BEFORE-DOWNLOAD PREVIEW + IN-PAGE DISPLAY layout.
+        // Edit this object to change the page/preview only. It does NOT affect PNG downloads.
         const ID_LAYOUT_preview = {
             churchName: { fontSize: "13px", fontWeight: "800", color: "#1e3a8a", marginTop: "10px", marginBottom: "4px", marginLeft: "0px", marginRight: "0px" },
             classNameText: { fontSize: "14px", fontWeight: "700", color: "#4f46e5", marginTop: "10px", marginBottom: "10px", marginLeft: "0px", marginRight: "20px" },
             detailsText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelWidth: "80px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
-            profilePic: { width: "96px", height: "96px", borderRadius: "50%", border: "3px red", ringGap: "4px", marginTop: "-150px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
-            logoAboveName: { size: 28, dx: 0, dy: 0 },
+            profilePic: { width: "96px", height: "96px", borderRadius: "50%", border: "3px #EdB200", ringGap: "4px", marginTop: "50px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" },
+            logoAboveName: { size: 28, dx: 0, dy: 0, left: 0, right: 0, up: 50, down: 0 },
             qrLogo: { size: 40, dx: 0, dy: 0 },
             qrCode: { width: 180, height: 180, bgColor: "transparent", borderRadius: "0px", padding: "0px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px", dotsColor: "#000000", dotsType: "rounded", cornersSquareColor: "#000000", cornersSquareType: "extra-rounded", cornersDotColor: "#000000", cornersDotType: "dot" },
             emergencyText: { fontSize: "11px", fontWeight: "600", color: "#111827", labelColor: "#6b7280", labelFontSize: "10px", marginTop: "0px", marginBottom: "0px", marginLeft: "0px", marginRight: "0px" }
@@ -645,11 +670,10 @@
                       </div>
                     </div>
                   </div>
-                  <div class="id-page-indicator" id="id-page-indicator">ID 1 / 2 · SWIPE LEFT OR RIGHT</div>
                 </div>
 
                 <div class="w-full flex items-stretch gap-2 mt-8">
-                  <button id="download-id-btn" onclick="openIDPreview()" class="flex-1 min-w-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-4 rounded-xl active:scale-[0.98] shadow-lg transition-all flex items-center justify-center gap-2">
+                  <button id="download-id-btn" onclick="downloadIDCards()" class="flex-1 min-w-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-4 rounded-xl active:scale-[0.98] shadow-lg transition-all flex items-center justify-center gap-2">
                     <i class="fa-solid fa-download"></i> Download ID Cards
                   </button>
                   <button id="delete-student-btn" onclick="deleteCurrentStudent()" aria-label="Delete student" title="Delete student" class="shrink-0 px-5 bg-red-700 hover:bg-red-600 text-white font-semibold rounded-xl active:scale-[0.98] shadow-lg transition-all flex items-center justify-center gap-2">
@@ -740,7 +764,48 @@
 
         function goToStep(step) { if (step === 1) { document.getElementById('form-step-1').classList.remove('hidden'); document.getElementById('form-step-2').classList.add('hidden'); } else { const first = document.getElementById('inp-first').value.trim(); if (!first) { showModal('Validation Error', 'First name is required before proceeding.'); return; } document.getElementById('form-step-1').classList.add('hidden'); document.getElementById('form-step-2').classList.remove('hidden'); } }
         function handleImageSelect(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { base64Image = e.target.result; document.getElementById('img-preview').src = base64Image; document.getElementById('img-preview-box').classList.remove('hidden'); document.getElementById('img-preview-box').classList.add('flex'); }; reader.readAsDataURL(file); }
-        function finishRegistration() { const cClass = document.getElementById('inp-class').value.trim(); if (!cClass) { showModal('Validation Error', 'Please assign a class (e.g. Class 1 through Class 8).'); return; } const randomId = 'STU-' + Math.floor(1000 + Math.random() * 9000); const student = { id: randomId, churchName: document.getElementById('inp-church').value.trim(), christName: document.getElementById('inp-christ').value.trim(), firstName: document.getElementById('inp-first').value.trim(), lastName: document.getElementById('inp-last').value.trim(), age: document.getElementById('inp-age').value.trim(), sex: document.getElementById('inp-sex').value, phone: document.getElementById('inp-phone').value.trim(), emerName: document.getElementById('inp-emer-name').value.trim(), emerPhone: document.getElementById('inp-emer-phone').value.trim(), className: cClass, pic: base64Image, startMark: maxMarkOfClass(getCleanClassNumber(cClass)) + 1 }; students.push(student); persistStudents(); showModal('Registration Successful', `Student ${student.firstName} has been saved successfully with ID: ${student.id}`); base64Image = null; document.getElementById('img-preview-box').classList.add('hidden'); document.getElementById('img-preview-box').classList.remove('flex'); document.getElementById('img-preview').src = ''; ['inp-church', 'inp-christ', 'inp-first', 'inp-last', 'inp-age', 'inp-phone', 'inp-emer-name', 'inp-emer-phone', 'inp-class'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); const sexEl = document.getElementById('inp-sex'); if (sexEl) sexEl.value = 'Male'; goToStep(1); switchNavTab('class'); }
+        function toggleClassPicker(e) {
+            if (e) e.stopPropagation();
+            const picker = document.getElementById('class-picker');
+            if (picker) picker.classList.toggle('hidden');
+        }
+        function chooseClass(n, e) {
+            if (e) e.stopPropagation();
+            const field = document.getElementById('inp-class');
+            if (field) { field.value = `Class ${n}`; field.placeholder = ''; field.style.borderColor = ''; }
+            const picker = document.getElementById('class-picker');
+            if (picker) picker.classList.add('hidden');
+        }
+        document.addEventListener('click', () => {
+            const picker = document.getElementById('class-picker');
+            if (picker) picker.classList.add('hidden');
+        });
+        function validateRegistrationFields() {
+            const fields = [
+                ['inp-church','Church Name'], ['inp-christ','Christ Name'],
+                ['inp-first','First Name'], ['inp-last','Last Name'],
+                ['inp-age','Age'], ['inp-phone','Phone'],
+                ['inp-emer-name','Emergency Name'], ['inp-emer-phone','Emergency Phone'],
+                ['inp-class','Class']
+            ];
+            fields.forEach(([id]) => { const el = document.getElementById(id); if (el) el.placeholder = ''; });
+            for (const [id, label] of fields) {
+                const el = document.getElementById(id);
+                if (el && !String(el.value || '').trim()) {
+                    el.placeholder = id === 'inp-class' ? 'Please choose Class' : `Please enter ${label}`;
+                    el.style.borderColor = '#ef4444';
+                    el.focus();
+                    if (id === 'inp-class') {
+                        const picker = document.getElementById('class-picker');
+                        if (picker) picker.classList.remove('hidden');
+                    }
+                    return false;
+                } else if (el) el.style.borderColor = '';
+            }
+            return true;
+        }
+
+        function finishRegistration() { if (!validateRegistrationFields()) return; const cClass = document.getElementById('inp-class').value.trim(); const randomId = 'STU-' + Math.floor(1000 + Math.random() * 9000); const student = { id: randomId, churchName: document.getElementById('inp-church').value.trim(), christName: document.getElementById('inp-christ').value.trim(), firstName: document.getElementById('inp-first').value.trim(), lastName: document.getElementById('inp-last').value.trim(), age: document.getElementById('inp-age').value.trim(), sex: document.getElementById('inp-sex').value, phone: document.getElementById('inp-phone').value.trim(), emerName: document.getElementById('inp-emer-name').value.trim(), emerPhone: document.getElementById('inp-emer-phone').value.trim(), className: cClass, pic: base64Image, startMark: maxMarkOfClass(getCleanClassNumber(cClass)) + 1 }; students.push(student); persistStudents(); showModal('Registration Successful', `Student ${student.firstName} has been saved successfully with ID: ${student.id}`); base64Image = null; document.getElementById('img-preview-box').classList.add('hidden'); document.getElementById('img-preview-box').classList.remove('flex'); document.getElementById('img-preview').src = ''; ['inp-church', 'inp-christ', 'inp-first', 'inp-last', 'inp-age', 'inp-phone', 'inp-emer-name', 'inp-emer-phone', 'inp-class'].forEach(id => { const el = document.getElementById(id); if (el) { el.value = ''; el.placeholder = ''; el.style.borderColor = ''; } }); const classPicker = document.getElementById('class-picker'); if (classPicker) classPicker.classList.add('hidden'); const sexEl = document.getElementById('inp-sex'); if (sexEl) sexEl.value = 'Male'; goToStep(1); switchNavTab('class'); }
         function getCleanClassNumber(str) { if(!str) return ""; return str.toLowerCase().replace(/[^0-9]/g, ''); }
 
         let videoStream = null, camInterval = null;
@@ -1099,7 +1164,6 @@
                 const qrSvg = await buildQrSvgForLayout(student, ID_LAYOUT);
                 const back = await composeIDFace(student, 'back', qrSvg);
                 triggerPngDownload(back, `Student_ID_Back_${student.id}.png`);
-                showModal('Success', 'Front and Back ID cards have been downloaded with the ID layout applied!');
             } catch (err) {
                 console.error("Download Error:", err);
                 showModal('Download Error', 'Could not generate the ID images. Please try again.');
@@ -1138,9 +1202,7 @@
         function setIDPageSide(side) {
             currentIDSide = side ? 1 : 0;
             const stack = document.getElementById('id-display-stack');
-            const indicator = document.getElementById('id-page-indicator');
             if (stack) stack.style.transform = `translateX(${-currentIDSide * ID_PAGE_W}px)`;
-            if (indicator) indicator.textContent = `ID ${currentIDSide + 1} / 2 · SWIPE LEFT OR RIGHT`;
         }
         function attachIDSwipe() {
             const viewport = document.getElementById('id-display-viewport');
