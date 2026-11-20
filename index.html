@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Fre Haymanot</title>
+    <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="Fre Haymanot student ID and attendance app">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon-192.png" type="image/png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
@@ -2428,5 +2433,30 @@
         initApp();
         initFirebaseSync();
     </script>
+
+<script>
+(() => {
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('Offline setup:', err)));
+  }
+  let installPrompt = null;
+  const installBtn = document.createElement('button');
+  installBtn.id = 'pwa-install-btn';
+  installBtn.type = 'button';
+  installBtn.textContent = 'Install App';
+  installBtn.setAttribute('aria-label', 'Install Fre Haymanot app');
+  installBtn.style.cssText = 'display:none;position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:99999;background:#2563eb;color:white;border:0;border-radius:999px;padding:12px 18px;font-weight:700;box-shadow:0 5px 18px #0006;font:600 14px Inter, sans-serif';
+  document.addEventListener('DOMContentLoaded', () => document.body.appendChild(installBtn));
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; installBtn.style.display = 'block'; });
+  installBtn.addEventListener('click', async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    try { await installPrompt.userChoice; } catch (_) {}
+    installPrompt = null; installBtn.style.display = 'none';
+  });
+  window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; installPrompt = null; });
+})();
+</script>
+
 </body>
 </html>
